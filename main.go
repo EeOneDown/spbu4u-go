@@ -128,15 +128,18 @@ func (server *Server) telegramUpdateWebHook(w http.ResponseWriter, r *http.Reque
 		// unmarshal
 		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
+			log.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		var update telegram_api.Update
 		if err := json.Unmarshal(data, &update); err != nil {
+			log.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		go server.TelegramBot.handleUpdate(&update)
+		log.Println("handleUpdate initiated")
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
