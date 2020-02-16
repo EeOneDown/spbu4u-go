@@ -131,6 +131,34 @@ func (telegramBot *TelegramBot) handleMessageToday(message *telegram_api.Message
 	}
 }
 
+func (telegramBot *TelegramBot) handleMessageTomorrow(message *telegram_api.Message) {
+	var scheduleStorage ScheduleStorage
+	telegramBot.DB.Joins(constants.StorageFor, message.Chat.ID).Find(&scheduleStorage)
+	today := time.Now()
+	tomorrow := today.AddDate(0, 0, 1)
+	dayAfterTomorrow := today.AddDate(0, 0, 2)
+	schedule, err := scheduleStorage.GetScheduleFor(tomorrow, dayAfterTomorrow)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	parsed, err := schedule.Parse()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	for _, scheduleText := range parsed {
+		botMessage := telegram_api.BotMessage{
+			ChatID: message.Chat.ID,
+			Text:   scheduleText,
+		}
+		if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+			log.Println(err)
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	log.Println(fmt.Sprintf("HANDLE MESSAGE STARTED: %s", message.Text))
 	if message.Text == "/start" {
