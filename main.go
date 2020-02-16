@@ -105,19 +105,19 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 }
 
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
+	log.Println("HANDLE MESSAGE STARTED")
 	if message.Text == "/start" {
-		go telegramBot.handleMessageStart(message)
+		telegramBot.handleMessageStart(message)
 	} else if match := constants.ScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
-		go telegramBot.handleMessageRegisterUrl(message, match...)
+		telegramBot.handleMessageRegisterUrl(message, match...)
 	} else {
 		log.Println(message)
 	}
 }
 
 func (telegramBot *TelegramBot) handleUpdate(update *telegram_api.Update) {
-	log.Println("HANDLE UPDATE STARTED")
 	if update.Message != nil {
-		go telegramBot.handleMessage(update.Message)
+		telegramBot.handleMessage(update.Message)
 	} else {
 		log.Println(update)
 	}
