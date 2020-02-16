@@ -26,6 +26,16 @@ type WebHookConfig struct {
 	AllowedUpdates []string `json:"allowed_updates"`
 }
 
+type WebHookInfo struct {
+	Url                  string   `json:"url"`
+	HasCustomCertificate bool     `json:"has_custom_certificate"`
+	PendingUpdateCount   int64    `json:"pending_update_count"`
+	LastErrorDate        int64    `json:"last_error_date"`
+	LastErrorMessage     string   `json:"last_error_message"`
+	MaxConnections       int64    `json:"max_connections"`
+	AllowedUpdates       []string `json:"allowed_updates"`
+}
+
 type BotMessage struct {
 	ChatID                int64  `json:"chat_id"`
 	Text                  string `json:"text"`

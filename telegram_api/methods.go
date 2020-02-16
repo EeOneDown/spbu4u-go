@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -22,19 +23,19 @@ func SetWebHookFor(token string, webHookConfig *WebHookConfig) error {
 }
 
 func GetWebHookInfoFor(token string) error {
-	res, err := http.Get(fmt.Sprintf(GetWebHookInfoUrl, token))
+	resp, err := http.Get(fmt.Sprintf(GetWebHookInfoUrl, token))
 	if err != nil {
 		return err
 	}
-	log.Println(res)
-	return nil
-}
-
-func DeleteWebHookFor(token string) error {
-	_, err := http.Get(fmt.Sprintf(DeleteWebHookUrl, token))
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
+	var webHookInfo WebHookInfo
+	if err := json.Unmarshal(body, &webHookInfo); err != nil {
+		return err
+	}
+	log.Println(webHookInfo)
 	return nil
 }
 

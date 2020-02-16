@@ -42,12 +42,6 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 	}
 }
 
-func (telegramBot *TelegramBot) deleteWebHook() {
-	if err := telegram_api.DeleteWebHookFor(telegramBot.Token); err != nil {
-		log.Fatal(err)
-	}
-}
-
 func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message) {
 	botMessage := telegram_api.BotMessage{
 		ChatID: message.Chat.ChatID,
