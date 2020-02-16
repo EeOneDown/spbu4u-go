@@ -105,7 +105,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 }
 
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
-	log.Println("HANDLE MESSAGE STARTED")
+	log.Println(fmt.Sprintf("HANDLE MESSAGE STARTED: %s", message.Text))
 	if message.Text == "/start" {
 		telegramBot.handleMessageStart(message)
 	} else if match := constants.ScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
