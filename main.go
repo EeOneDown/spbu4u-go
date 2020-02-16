@@ -104,12 +104,41 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	}
 }
 
+func (telegramBot *TelegramBot) handleMessageToday(message *telegram_api.Message) {
+	var scheduleStorage ScheduleStorage
+	telegramBot.DB.Joins(constants.StorageFor, message.Chat.ID).Find(&scheduleStorage)
+	today := time.Now()
+	tomorrow := today.AddDate(0, 0, 1)
+	schedule, err := scheduleStorage.GetScheduleFor(today, tomorrow)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	parsed, err := schedule.Parse()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	for _, scheduleText := range parsed {
+		botMessage := telegram_api.BotMessage{
+			ChatID: message.Chat.ID,
+			Text:   scheduleText,
+		}
+		if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+			log.Println(err)
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	log.Println(fmt.Sprintf("HANDLE MESSAGE STARTED: %s", message.Text))
 	if message.Text == "/start" {
 		telegramBot.handleMessageStart(message)
 	} else if match := constants.ScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
 		telegramBot.handleMessageRegisterUrl(message, match...)
+	} else if message.Text == "/today" {
+		telegramBot.handleMessageToday(message)
 	} else {
 		log.Println(message)
 	}
@@ -196,7 +225,9 @@ func initTelegramBot(db *gorm.DB) *TelegramBot {
 	}
 
 	telegramBot := TelegramBot{db, telegramBotToken}
-	telegramBot.setWebHook(domain)
+	if os.Getenv("SKIP_TELEGRAM_WEB_HOOK_SET") == "" {
+		telegramBot.setWebHook(domain)
+	}
 
 	return &telegramBot
 }
