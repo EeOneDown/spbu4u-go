@@ -23,6 +23,10 @@ func SetWebHookFor(token string, webHookConfig *WebHookConfig) error {
 }
 
 func GetWebHookInfoFor(token string) error {
+	type WebHookInfoResponse struct {
+		Ok     bool         `json:"ok"`
+		Result *WebHookInfo `json:"result"`
+	}
 	resp, err := http.Get(fmt.Sprintf(GetWebHookInfoUrl, token))
 	if err != nil {
 		return err
@@ -31,11 +35,11 @@ func GetWebHookInfoFor(token string) error {
 	if err != nil {
 		return err
 	}
-	var webHookInfo WebHookInfo
-	if err := json.Unmarshal(body, &webHookInfo); err != nil {
+	var webHookInfoResponse WebHookInfoResponse
+	if err := json.Unmarshal(body, &webHookInfoResponse); err != nil {
 		return err
 	}
-	log.Println(webHookInfo)
+	log.Println(webHookInfoResponse.Ok, *webHookInfoResponse.Result)
 	return nil
 }
 
