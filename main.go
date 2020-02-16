@@ -167,6 +167,8 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 		telegramBot.handleMessageRegisterUrl(message, match...)
 	} else if message.Text == "/today" {
 		telegramBot.handleMessageToday(message)
+	} else if message.Text == "/tomorrow" {
+		telegramBot.handleMessageTomorrow(message)
 	} else {
 		log.Println(message)
 	}
