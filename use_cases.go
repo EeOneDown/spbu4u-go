@@ -46,7 +46,7 @@ func (scheduleNotAllowed *ScheduleNotAllowed) Parse() ([]string, error) {
 type NotRegistered int
 
 func (notRegistered *NotRegistered) Parse() ([]string, error) {
-	return []string{"Schedule is not allowed for you. Please register via the timetable.spbu.api schedule link."}, nil
+	return []string{"Schedule is not allowed for you. Please register via the timetable.spbu.ru schedule link."}, nil
 }
 
 type GroupEvents types.GroupEvents
