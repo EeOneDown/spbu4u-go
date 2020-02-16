@@ -1,7 +1,7 @@
 package telegram_api
 
 type Chat struct {
-	ChatID    int64  `json:"chat_id"`
+	ID        int64  `json:"id"`
 	Type      string `json:"type"`
 	UserName  string `json:"username"`
 	FirstName string `json:"first_name"`

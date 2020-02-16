@@ -45,7 +45,7 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message) {
 	log.Println(message.Chat)
 	botMessage := telegram_api.BotMessage{
-		ChatID: message.Chat.ChatID,
+		ChatID: message.Chat.ID,
 		Text: "Send me the schedule link from the timetable.spbu.ru\n" +
 			"e.g. https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508",
 	}
@@ -91,12 +91,12 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	// update or create user
 	var user User
 	telegramBot.DB.FirstOrCreate(&user, User{
-		TelegramChatID:    message.Chat.ChatID,
+		TelegramChatID:    message.Chat.ID,
 		ScheduleStorageID: scheduleStorage.ID,
 	})
 
 	botMessage := telegram_api.BotMessage{
-		ChatID: message.Chat.ChatID,
+		ChatID: message.Chat.ID,
 		Text:   fmt.Sprintf("Your schedule storage is %s", scheduleStorageName),
 	}
 	if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
