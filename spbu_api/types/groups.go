@@ -1,7 +1,5 @@
 package types
 
-import "time"
-
 type GroupEvents struct {
 	StudentGroupId                   int64
 	StudentGroupDisplayName          string
@@ -17,15 +15,15 @@ type GroupEvents struct {
 }
 
 type EventsDay struct {
-	Day            time.Time
+	Day            ZLessTime
 	DayString      string
 	DayStudyEvents []Event
 }
 
 type Event struct {
 	StudyEventsTimeTableKindCode     int
-	Start                            time.Time
-	End                              time.Time
+	Start                            ZLessTime
+	End                              ZLessTime
 	Subject                          string
 	TimeIntervalString               string
 	DateWithTimeIntervalString       string
