@@ -43,15 +43,28 @@ func GetWebHookInfoFor(token string) (*WebHookInfo, error) {
 	return webHookInfoResponse.Result, nil
 }
 
-func SendMessageFrom(token string, message *BotMessage) error {
+func SendMessageFrom(token string, message *BotMessage) (*Message, error) {
+	type MessageResponse struct {
+		Ok     bool     `json:"ok"`
+		Result *Message `json:"result"`
+	}
 	data, err := json.Marshal(message)
 	if err != nil {
-		return err
+		return &Message{}, err
 	}
 	r := bytes.NewReader(data)
-	_, err = http.Post(fmt.Sprintf(SendMessage, token), "application/json", r)
+	resp, err := http.Post(fmt.Sprintf(SendMessage, token), "application/json", r)
 	if err != nil {
-		return err
+		return &Message{}, err
 	}
-	return nil
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return &Message{}, err
+	}
+	var messageResponse MessageResponse
+	if err := json.Unmarshal(body, &messageResponse); err != nil {
+		return &Message{}, err
+	}
+	log.Println(messageResponse.Ok, *messageResponse.Result)
+	return messageResponse.Result, nil
 }

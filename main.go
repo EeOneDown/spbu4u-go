@@ -48,7 +48,7 @@ func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message
 		Text: "Send me the schedule link from the timetable.spbu.ru\n" +
 			"e.g. https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508",
 	}
-	if err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+	if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
 		log.Println(err)
 	}
 }
@@ -98,7 +98,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 		ChatID: message.Chat.ChatID,
 		Text:   fmt.Sprintf("Your schedule storage is %s", scheduleStorageName),
 	}
-	if err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+	if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
 		log.Println(err)
 	}
 }
