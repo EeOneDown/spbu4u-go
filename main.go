@@ -188,7 +188,6 @@ func main() {
 	}()
 
 	telegramBot := initTelegramBot(db)
-	defer telegramBot.deleteWebHook()
 	server := &Server{db, telegramBot}
 
 	http.HandleFunc("/tg/updates", server.telegramUpdateWebHook)
