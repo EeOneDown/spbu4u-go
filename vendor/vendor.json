@@ -9,6 +9,12 @@
 			"revisionTime": "2020-01-26T15:28:32Z"
 		},
 		{
+			"checksumSHA1": "uuiW4hoYTOqWettGpKw4fGfGMFQ=",
+			"path": "github.com/jinzhu/gorm/dialects/postgres",
+			"revision": "7180bd0f27d167f18c253c32d548c7de3adc6b0d",
+			"revisionTime": "2020-01-26T15:28:32Z"
+		},
+		{
 			"checksumSHA1": "iqeSAF7imnVsW+iqLqf6kkYn1VU=",
 			"path": "github.com/jinzhu/inflection",
 			"revision": "f5c5f50e6090ae76a29240b61ae2a90dd810112e",
