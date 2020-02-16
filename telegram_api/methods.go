@@ -49,7 +49,7 @@ func SendMessageFrom(token string, message *BotMessage) error {
 		return err
 	}
 	r := bytes.NewReader(data)
-	_, err = http.Post(fmt.Sprintf(SetWebHookUrl, token), "application/json", r)
+	_, err = http.Post(fmt.Sprintf(SendMessage, token), "application/json", r)
 	if err != nil {
 		return err
 	}

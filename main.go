@@ -216,7 +216,7 @@ func main() {
 	server := &Server{db, telegramBot}
 
 	http.HandleFunc("/tg/updates", server.telegramUpdateWebHook)
-	http.HandleFunc("/getTelegramWebHookInfo", server.getTelegramWebHookInfo)
-	http.HandleFunc("/setTelegramWebHook", server.setTelegramWebHook)
+	// http.HandleFunc("/getTelegramWebHookInfo", server.getTelegramWebHookInfo)
+	// http.HandleFunc("/setTelegramWebHook", server.setTelegramWebHook)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
