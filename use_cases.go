@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"spbu4u-go/constants"
 	"spbu4u-go/spbu_api"
 	"spbu4u-go/spbu_api/types"
@@ -52,7 +53,30 @@ func (notRegistered *NotRegistered) Parse() ([]string, error) {
 type GroupEvents types.GroupEvents
 
 func (groupEvents *GroupEvents) Parse() ([]string, error) {
-	return []string{"Working on it."}, nil
+	var parsed []string
+	for _, day := range groupEvents.Days {
+		if len(day.DayStudyEvents) == 0 {
+			continue
+		}
+		dayParsed := ""
+		for _, event := range day.DayStudyEvents {
+			dayParsed += fmt.Sprintf("%s\n%s\n%s (%s)\n\n",
+				event.TimeIntervalString,
+				event.Subject,
+				event.LocationsDisplayText,
+				event.EducatorsDisplayText,
+			)
+		}
+		if dayParsed == "" {
+			continue
+		}
+		dayParsed = fmt.Sprintf("%s\n\n", day.DayString) + dayParsed
+		parsed = append(parsed, day.DayString)
+	}
+	if len(parsed) == 0 {
+		return []string{"Nothing to display."}, nil
+	}
+	return parsed, nil
 }
 
 type EducatorEvents types.EducatorEvents
