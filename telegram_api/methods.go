@@ -52,7 +52,7 @@ func SendMessageFrom(token string, message *BotMessage) (*Message, error) {
 	if err != nil {
 		return &Message{}, err
 	}
-	log.Println(data)
+	log.Println(string(data))
 	r := bytes.NewReader(data)
 	resp, err := http.Post(fmt.Sprintf(SendMessage, token), "application/json", r)
 	if err != nil {
@@ -62,10 +62,10 @@ func SendMessageFrom(token string, message *BotMessage) (*Message, error) {
 	if err != nil {
 		return &Message{}, err
 	}
-	var messageResponse MessageResponse
-	if err := json.Unmarshal(body, &messageResponse); err != nil {
+	var sentMessage Message
+	if err := json.Unmarshal(body, &sentMessage); err != nil {
 		return &Message{}, err
 	}
-	log.Println(messageResponse.Ok, messageResponse.Result)
-	return messageResponse.Result, nil
+	log.Println(sentMessage)
+	return &sentMessage, nil
 }
