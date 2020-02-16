@@ -115,6 +115,7 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 }
 
 func (telegramBot *TelegramBot) handleUpdate(update *telegram_api.Update) {
+	log.Println("HANDLE UPDATE STARTED")
 	if update.Message != nil {
 		go telegramBot.handleMessage(update.Message)
 	} else {
@@ -139,7 +140,6 @@ func (server *Server) telegramUpdateWebHook(w http.ResponseWriter, r *http.Reque
 			return
 		}
 		go server.TelegramBot.handleUpdate(&update)
-		log.Println("handleUpdate initiated")
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
