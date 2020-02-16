@@ -70,7 +70,7 @@ func (groupEvents *GroupEvents) Parse() ([]string, error) {
 		if dayParsed == "" {
 			continue
 		}
-		dayParsed = fmt.Sprintf("%s\n\n", day.DayString) + dayParsed
+		dayParsed = fmt.Sprintf("%s\n\n%s", day.DayString, dayParsed)
 		parsed = append(parsed, day.DayString)
 	}
 	if len(parsed) == 0 {
