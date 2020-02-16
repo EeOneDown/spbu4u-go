@@ -9,6 +9,12 @@
 			"revisionTime": "2020-01-26T15:28:32Z"
 		},
 		{
+			"checksumSHA1": "iqeSAF7imnVsW+iqLqf6kkYn1VU=",
+			"path": "github.com/jinzhu/inflection",
+			"revision": "f5c5f50e6090ae76a29240b61ae2a90dd810112e",
+			"revisionTime": "2019-06-03T04:28:36Z"
+		},
+		{
 			"checksumSHA1": "iSGHMfkwqVO2WV9lcUhiZ5lXFKA=",
 			"path": "github.com/lib/pq",
 			"revision": "9eb3fc897d6fd97dd4aad3d0404b54e2f7cc56be",
