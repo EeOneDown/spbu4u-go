@@ -139,7 +139,7 @@ func (server *Server) telegramUpdateWebHook(w http.ResponseWriter, r *http.Reque
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go server.TelegramBot.handleUpdate(&update)
+		server.TelegramBot.handleUpdate(&update)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
