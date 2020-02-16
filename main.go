@@ -27,8 +27,10 @@ type Server struct {
 }
 
 func (telegramBot *TelegramBot) setWebHook(domain string) {
+	url := fmt.Sprintf("https://%s:443/tg/updates", domain)
+	log.Println(url)
 	webHookConfig := telegram_api.WebHookConfig{
-		Url:            fmt.Sprintf("https://%s:443/tg/updates", domain),
+		Url:            url,
 		MaxConnections: 40,
 		AllowedUpdates: []string{"message"},
 	}
