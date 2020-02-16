@@ -43,6 +43,7 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 }
 
 func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message) {
+	log.Println(message.Chat)
 	botMessage := telegram_api.BotMessage{
 		ChatID: message.Chat.ChatID,
 		Text: "Send me the schedule link from the timetable.spbu.ru\n" +
