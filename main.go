@@ -37,7 +37,7 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 	if err := telegram_api.SetWebHookFor(telegramBot.Token, &webHookConfig); err != nil {
 		log.Fatal(err)
 	}
-	if err := telegram_api.GetWebHookInfoFor(telegramBot.Token); err != nil {
+	if _, err := telegram_api.GetWebHookInfoFor(telegramBot.Token); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -144,6 +144,23 @@ func (server *Server) telegramUpdateWebHook(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func (server *Server) getTelegramWebHookInfo(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		webHookInfo, err := telegram_api.GetWebHookInfoFor(server.TelegramBot.Token)
+		if err != nil {
+			log.Println(err)
+		}
+		webHookInfoJson, _ := json.Marshal(webHookInfo)
+		w.Header().Set("Content-Type", "application/json")
+		if _, err := w.Write(webHookInfoJson); err != nil {
+			log.Println(err)
+		}
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
 // init helpers
 func initDB() *gorm.DB {
 	databaseUrl := os.Getenv("DATABASE_URL")
@@ -190,5 +207,6 @@ func main() {
 	server := &Server{db, telegramBot}
 
 	http.HandleFunc("/tg/updates", server.telegramUpdateWebHook)
+	http.HandleFunc("/getWebHookInfo", server.getTelegramWebHookInfo)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
