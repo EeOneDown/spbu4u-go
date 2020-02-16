@@ -1,6 +1,19 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"package": [],
+	"package": [
+		{
+			"checksumSHA1": "127FjqB8R9+ewoYNxa6svdJgdRU=",
+			"path": "github.com/jinzhu/gorm",
+			"revision": "7180bd0f27d167f18c253c32d548c7de3adc6b0d",
+			"revisionTime": "2020-01-26T15:28:32Z"
+		},
+		{
+			"checksumSHA1": "iSGHMfkwqVO2WV9lcUhiZ5lXFKA=",
+			"path": "github.com/lib/pq",
+			"revision": "9eb3fc897d6fd97dd4aad3d0404b54e2f7cc56be",
+			"revisionTime": "2020-01-16T17:15:13Z"
+		}
+	],
 	"rootPath": "spbu4u-go"
 }
