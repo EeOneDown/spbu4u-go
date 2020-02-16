@@ -46,7 +46,7 @@ func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message
 	log.Println(message.Chat)
 	botMessage := telegram_api.BotMessage{
 		ChatID: message.Chat.ID,
-		Text: "Send me the schedule link from the timetable.spbu.ru\n" +
+		Text: "Send me your schedule link from the timetable.spbu.ru\n" +
 			"e.g. https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508",
 	}
 	if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
