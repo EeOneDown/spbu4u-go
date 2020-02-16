@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -17,6 +18,15 @@ func SetWebHookFor(token string, webHookConfig *WebHookConfig) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func GetWebHookInfoFor(token string) error {
+	res, err := http.Get(fmt.Sprintf(GetWebHookInfoUrl, token))
+	if err != nil {
+		return err
+	}
+	log.Println(res)
 	return nil
 }
 

@@ -35,6 +35,9 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 	if err := telegram_api.SetWebHookFor(telegramBot.Token, &webHookConfig); err != nil {
 		log.Fatal(err)
 	}
+	if err := telegram_api.GetWebHookInfoFor(telegramBot.Token); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (telegramBot *TelegramBot) deleteWebHook() {
@@ -139,7 +142,7 @@ func (server *Server) telegramUpdateWebHook(w http.ResponseWriter, r *http.Reque
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		server.TelegramBot.handleUpdate(&update)
+		go server.TelegramBot.handleUpdate(&update)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
