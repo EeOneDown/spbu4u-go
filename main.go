@@ -144,6 +144,15 @@ func (server *Server) telegramUpdateWebHook(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func (server *Server) setTelegramWebHook(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		server.TelegramBot.setWebHook(os.Getenv("DOMAIN"))
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
 func (server *Server) getTelegramWebHookInfo(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -207,6 +216,7 @@ func main() {
 	server := &Server{db, telegramBot}
 
 	http.HandleFunc("/tg/updates", server.telegramUpdateWebHook)
-	http.HandleFunc("/getWebHookInfo", server.getTelegramWebHookInfo)
+	http.HandleFunc("/getTelegramWebHookInfo", server.getTelegramWebHookInfo)
+	http.HandleFunc("/setTelegramWebHook", server.setTelegramWebHook)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
