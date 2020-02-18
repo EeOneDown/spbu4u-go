@@ -71,7 +71,7 @@ func (groupEvents *GroupEvents) Parse() ([]string, error) {
 			continue
 		}
 		dayParsed = fmt.Sprintf("%s\n\n%s", day.DayString, dayParsed)
-		parsed = append(parsed, day.DayString)
+		parsed = append(parsed, dayParsed)
 	}
 	if len(parsed) == 0 {
 		return []string{"Nothing to display."}, nil
