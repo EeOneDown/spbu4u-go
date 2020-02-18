@@ -8,9 +8,6 @@ import (
 	"time"
 )
 
-//
-// T Y P E S
-//
 type EducatorEvents struct {
 	EducatorMasterId                 int64
 	EducatorDisplayText              string
@@ -22,12 +19,9 @@ type EducatorEvents struct {
 	IsCurrentWeekReferenceAvailable  bool
 	WeekDisplayText                  string
 	WeekMonday                       JsonDate
-	//EducatorEventsDays (Array[SpbuEducation.TimeTable.Web.Api.v1.DataContracts.EducatorEventsContract.EventsDay], optional): Events grouped by days of week
+	EducatorEventsDays               []EventsDay
 }
 
-//
-// H E L P E R S
-//
 func parseEducatorEvents(resp *http.Response, educatorEvents *EducatorEvents) error {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -39,9 +33,6 @@ func parseEducatorEvents(resp *http.Response, educatorEvents *EducatorEvents) er
 	return nil
 }
 
-//
-// M E T H O D S
-//
 func GetEducatorScheduleFor(id int64, from time.Time, to time.Time) (*EducatorEvents, error) {
 	var educatorEvents EducatorEvents
 	fromYear, fromMonth, fromDay := from.Date()

@@ -53,5 +53,28 @@ func (groupEvents *GroupEvents) Parse() ([]string, error) {
 type EducatorEvents spbu_api.EducatorEvents
 
 func (educatorEvents *EducatorEvents) Parse() ([]string, error) {
-	return []string{"Working on it."}, nil
+	var parsed []string
+	for _, day := range educatorEvents.EducatorEventsDays {
+		if len(day.DayStudyEvents) == 0 {
+			continue
+		}
+		dayParsed := ""
+		for _, event := range day.DayStudyEvents {
+			dayParsed += fmt.Sprintf("%s\n%s\n%s (%s)\n\n",
+				event.TimeIntervalString,
+				event.Subject,
+				event.LocationsDisplayText,
+				event.EducatorsDisplayText,
+			)
+		}
+		if dayParsed == "" {
+			continue
+		}
+		dayParsed = fmt.Sprintf("%s\n\n%s", day.DayString, dayParsed)
+		parsed = append(parsed, dayParsed)
+	}
+	if len(parsed) == 0 {
+		return []string{"Nothing to display."}, nil
+	}
+	return parsed, nil
 }
