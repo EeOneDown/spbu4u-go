@@ -60,11 +60,10 @@ func (educatorEvents *EducatorEvents) Parse() ([]string, error) {
 		}
 		dayParsed := ""
 		for _, event := range day.DayStudyEvents {
-			dayParsed += fmt.Sprintf("%s\n%s\n%s (%s)\n\n",
+			dayParsed += fmt.Sprintf("%s\n%s\n%s\n\n",
 				event.TimeIntervalString,
 				event.Subject,
 				event.LocationsDisplayText,
-				event.EducatorsDisplayText,
 			)
 		}
 		if dayParsed == "" {
