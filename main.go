@@ -82,18 +82,20 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	}
 
 	var scheduleStorage ScheduleStorage
-	telegramBot.DB.FirstOrCreate(&scheduleStorage, ScheduleStorage{
+	telegramBot.DB.Where(ScheduleStorage{
 		TimeTableId: scheduleId,
 		Type:        scheduleType,
-		Name:        scheduleStorageName,
-	})
+	}).Assign(ScheduleStorage{
+		Name: scheduleStorageName,
+	}).FirstOrCreate(&scheduleStorage)
 
 	// update or create user
 	var user User
-	telegramBot.DB.FirstOrCreate(&user, User{
-		TelegramChatID:    message.Chat.ID,
+	telegramBot.DB.Where(User{
+		TelegramChatID: message.Chat.ID,
+	}).Assign(User{
 		ScheduleStorageID: scheduleStorage.ID,
-	})
+	}).FirstOrCreate(&user)
 
 	botMessage := telegram_api.BotMessage{
 		ChatID: message.Chat.ID,
