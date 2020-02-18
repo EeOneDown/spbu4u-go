@@ -16,7 +16,6 @@ func InitDB() *gorm.DB {
 	if err != nil {
 		log.Fatal("failed to connect database")
 	}
-	db.DropTableIfExists(&User{}, &ScheduleStorage{}) // todo: remove
 	db.AutoMigrate(&User{}, &ScheduleStorage{})
 	return db
 }
