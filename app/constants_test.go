@@ -1,7 +1,6 @@
-package tests
+package app
 
 import (
-	"spbu4u-go/constants"
 	"strconv"
 	"testing"
 )
@@ -19,9 +18,9 @@ func TestFindScheduleFromGroupUrl(t *testing.T) {
 	}
 	const goodTypeStr = "StudentGroupEvents"
 	const goodScheduleId = 247986
-	const goodScheduleType = constants.GROUP
+	const goodScheduleType = ScheduleStorageTypeGroup
 	for _, goodUrl := range goodUrls {
-		match := constants.ScheduleLink.FindStringSubmatch(goodUrl)
+		match := RegExpScheduleLink.FindStringSubmatch(goodUrl)
 		if match == nil || len(match) != 3 {
 			t.Fail()
 			continue
@@ -36,7 +35,7 @@ func TestFindScheduleFromGroupUrl(t *testing.T) {
 			t.Fail()
 			continue
 		}
-		scheduleType := constants.ScheduleTypeMapper[typeStr]
+		scheduleType := ScheduleStorageTypeMapper[typeStr]
 		if scheduleType != goodScheduleType {
 			t.Fail()
 			continue
@@ -52,9 +51,9 @@ func TestFindScheduleFromEducatorUrl(t *testing.T) {
 	}
 	const goodTypeStr = "EducatorEvents"
 	const goodScheduleId = 1420
-	const goodScheduleType = constants.EDUCATOR
+	const goodScheduleType = ScheduleStorageTypeEducator
 	for _, goodUrl := range goodUrls {
-		match := constants.ScheduleLink.FindStringSubmatch(goodUrl)
+		match := RegExpScheduleLink.FindStringSubmatch(goodUrl)
 		if match == nil || len(match) != 3 {
 			t.Fail()
 			continue
@@ -69,7 +68,7 @@ func TestFindScheduleFromEducatorUrl(t *testing.T) {
 			t.Fail()
 			continue
 		}
-		scheduleType := constants.ScheduleTypeMapper[typeStr]
+		scheduleType := ScheduleStorageTypeMapper[typeStr]
 		if scheduleType != goodScheduleType {
 			t.Fail()
 			continue
@@ -85,9 +84,9 @@ func TestFindScheduleFromWeekEducatorUrl(t *testing.T) {
 	}
 	const goodTypeStr = "WeekEducatorEvents"
 	const goodScheduleId = 1420
-	const goodScheduleType = constants.EDUCATOR
+	const goodScheduleType = ScheduleStorageTypeEducator
 	for _, goodUrl := range goodUrls {
-		match := constants.ScheduleLink.FindStringSubmatch(goodUrl)
+		match := RegExpScheduleLink.FindStringSubmatch(goodUrl)
 		if match == nil || len(match) != 3 {
 			t.Fail()
 			continue
@@ -102,7 +101,7 @@ func TestFindScheduleFromWeekEducatorUrl(t *testing.T) {
 			t.Fail()
 			continue
 		}
-		scheduleType := constants.ScheduleTypeMapper[typeStr]
+		scheduleType := ScheduleStorageTypeMapper[typeStr]
 		if scheduleType != goodScheduleType {
 			t.Fail()
 			continue

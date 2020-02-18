@@ -1,4 +1,4 @@
-package types
+package spbu_api
 
 import (
 	"encoding/json"

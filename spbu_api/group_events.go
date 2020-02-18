@@ -1,5 +1,16 @@
-package types
+package spbu_api
 
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+)
+
+//
+// T Y P E S
+//
 type GroupEvents struct {
 	StudentGroupId                   int64
 	StudentGroupDisplayName          string
@@ -64,4 +75,34 @@ type EventLocation struct {
 type EducatorId struct {
 	Id   int64  `json:"Item1"`
 	Name string `json:"Item2"`
+}
+
+//
+// H E L P E R S
+//
+func parseGroupEvents(resp *http.Response, groupEvents *GroupEvents) error {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(body, &groupEvents); err != nil {
+		return err
+	}
+	return nil
+}
+
+//
+// M E T H O D S
+//
+func GetGroupScheduleFor(id int64, from time.Time, to time.Time) (*GroupEvents, error) {
+	var groupEvents GroupEvents
+	fromYear, fromMonth, fromDay := from.Date()
+	toYear, toMonth, toDay := to.Date()
+	url := fmt.Sprintf(GroupCustomUrl, id, fromYear, fromMonth, fromDay, toYear, toMonth, toDay)
+	resp, err := http.Get(url)
+	if err != nil {
+		return &groupEvents, err
+	}
+	err = parseGroupEvents(resp, &groupEvents)
+	return &groupEvents, err
 }
