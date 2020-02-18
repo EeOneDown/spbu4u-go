@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"spbu4u-go/spbu_api"
+	"strings"
 )
 
 type Schedule interface {
@@ -41,7 +42,7 @@ func (groupEvents *GroupEvents) Parse() ([]string, error) {
 		if dayParsed == "" {
 			continue
 		}
-		dayParsed = fmt.Sprintf("%s\n\n%s", day.DayString, dayParsed)
+		dayParsed = fmt.Sprintf("%s\n\n%s", strings.Title(day.DayString), dayParsed)
 		parsed = append(parsed, dayParsed)
 	}
 	if len(parsed) == 0 {
@@ -69,7 +70,7 @@ func (educatorEvents *EducatorEvents) Parse() ([]string, error) {
 		if dayParsed == "" {
 			continue
 		}
-		dayParsed = fmt.Sprintf("%s\n\n%s", day.DayString, dayParsed)
+		dayParsed = fmt.Sprintf("%s\n\n%s", strings.Title(day.DayString), dayParsed)
 		parsed = append(parsed, dayParsed)
 	}
 	if len(parsed) == 0 {
