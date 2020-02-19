@@ -63,13 +63,13 @@ func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message
 }
 
 func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.Message, match ...string) {
-	botMessage := telegram_api.BotMessage{
-		ChatID: message.Chat.ID,
-		Text:   "Registering...",
-	}
 	botMessageChan := make(chan *telegram_api.Message, 1)
 	go func() {
-		if err := telegramBot.Bot.SendMessageToEdit(&botMessage, botMessageChan); err != nil {
+		botMessage := &telegram_api.BotMessage{
+			ChatID: message.Chat.ID,
+			Text:   "Registering...",
+		}
+		if err := telegramBot.Bot.SendMessageToEdit(botMessage, botMessageChan); err != nil {
 			log.Println(err)
 		}
 	}()
@@ -124,24 +124,37 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	}
 }
 
-func (telegramBot *TelegramBot) handleMessageToday(message *telegram_api.Message) {
+func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from time.Time, to time.Time) {
+	botMessageChan := make(chan *telegram_api.Message, 1)
+	go func() {
+		botMessage := &telegram_api.BotMessage{
+			ChatID: chat.ID,
+			Text:   "Searching...",
+		}
+		if err := telegramBot.Bot.SendMessageToEdit(botMessage, botMessageChan); err != nil {
+			log.Println(err)
+		}
+	}()
 	var scheduleStorage ScheduleStorage
-	telegramBot.DB.Joins(DBQueryGetStorageFor, message.Chat.ID).Find(&scheduleStorage)
-	today := time.Now()
-	tomorrow := today.AddDate(0, 0, 1)
-	schedule, err := scheduleStorage.GetSchedule(today, tomorrow)
+	telegramBot.DB.Joins(DBQueryGetStorageFor, chat.ID).Find(&scheduleStorage)
+	schedule, err := scheduleStorage.GetSchedule(from, to)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	parsed, err := schedule.Parse()
-	if err != nil {
-		log.Println(err)
-		return
+	parsed := schedule.Parse()
+	toEdit, toSend := parsed[0], parsed[1:]
+	botEditedMessage := telegram_api.BotEditedMessage{
+		ChatID:    chat.ID,
+		MessageID: (<-botMessageChan).MessageID,
+		Text:      toEdit,
 	}
-	for _, scheduleText := range parsed {
+	if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
+		log.Println(err)
+	}
+	for _, scheduleText := range toSend {
 		botMessage := telegram_api.BotMessage{
-			ChatID: message.Chat.ID,
+			ChatID: chat.ID,
 			Text:   scheduleText,
 		}
 		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
@@ -151,32 +164,17 @@ func (telegramBot *TelegramBot) handleMessageToday(message *telegram_api.Message
 	}
 }
 
+func (telegramBot *TelegramBot) handleMessageToday(message *telegram_api.Message) {
+	today := time.Now()
+	tomorrow := today.AddDate(0, 0, 1)
+	telegramBot.sendScheduleTo(message.Chat, today, tomorrow)
+}
+
 func (telegramBot *TelegramBot) handleMessageTomorrow(message *telegram_api.Message) {
-	var scheduleStorage ScheduleStorage
-	telegramBot.DB.Joins(DBQueryGetStorageFor, message.Chat.ID).Find(&scheduleStorage)
 	today := time.Now()
 	tomorrow := today.AddDate(0, 0, 1)
 	dayAfterTomorrow := today.AddDate(0, 0, 2)
-	schedule, err := scheduleStorage.GetSchedule(tomorrow, dayAfterTomorrow)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	parsed, err := schedule.Parse()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	for _, scheduleText := range parsed {
-		botMessage := telegram_api.BotMessage{
-			ChatID: message.Chat.ID,
-			Text:   scheduleText,
-		}
-		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
-			log.Println(err)
-		}
-		time.Sleep(1 * time.Second)
-	}
+	telegramBot.sendScheduleTo(message.Chat, tomorrow, dayAfterTomorrow)
 }
 
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
