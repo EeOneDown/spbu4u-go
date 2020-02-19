@@ -12,8 +12,8 @@ import (
 )
 
 type TelegramBot struct {
-	DB    *gorm.DB
-	Token string
+	DB  *gorm.DB
+	Bot *telegram_api.Bot
 }
 
 func InitTelegramBot(db *gorm.DB) *TelegramBot {
@@ -25,8 +25,8 @@ func InitTelegramBot(db *gorm.DB) *TelegramBot {
 	if domain == "" {
 		log.Fatal("$DOMAIN must be set")
 	}
-
-	telegramBot := TelegramBot{db, telegramBotToken}
+	bot := &telegram_api.Bot{Token: telegramBotToken}
+	telegramBot := TelegramBot{db, bot}
 	if os.Getenv("SKIP_TELEGRAM_WEB_HOOK_SET") == "" {
 		telegramBot.setWebHook(domain)
 	}
@@ -42,10 +42,10 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 		MaxConnections: 40,
 		AllowedUpdates: []string{"message"},
 	}
-	if err := telegram_api.SetWebHookFor(telegramBot.Token, &webHookConfig); err != nil {
+	if err := telegramBot.Bot.SetWebHook(&webHookConfig); err != nil {
 		log.Fatal(err)
 	}
-	if _, err := telegram_api.GetWebHookInfoFor(telegramBot.Token); err != nil {
+	if _, err := telegramBot.Bot.GetWebHookInfo(); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -57,12 +57,22 @@ func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message
 		Text: "Send me your schedule link from the timetable.spbu.ru\n" +
 			"e.g. https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508",
 	}
-	if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 		log.Println(err)
 	}
 }
 
 func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.Message, match ...string) {
+	botMessage := telegram_api.BotMessage{
+		ChatID: message.Chat.ID,
+		Text:   "Registering...",
+	}
+	botMessageChan := make(chan *telegram_api.Message, 1)
+	go func() {
+		if err := telegramBot.Bot.SendMessageToEdit(&botMessage, botMessageChan); err != nil {
+			log.Println(err)
+		}
+	}()
 	typeStr := match[1]
 	scheduleId, err := strconv.ParseInt(match[2], 10, 64)
 	if err != nil {
@@ -74,15 +84,14 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	//get schedule storage name
 	var scheduleStorageName string
 	today := time.Now()
-	tomorrow := today.AddDate(0, 0, 1)
 	if scheduleType == ScheduleStorageTypeGroup {
-		res, err := spbu_api.GetGroupScheduleFor(scheduleId, today, tomorrow)
+		res, err := spbu_api.GetGroupScheduleFor(scheduleId, today, today)
 		if err != nil {
 			return
 		}
 		scheduleStorageName = res.StudentGroupDisplayName
 	} else {
-		res, err := spbu_api.GetEducatorScheduleFor(scheduleId, today, tomorrow)
+		res, err := spbu_api.GetEducatorScheduleFor(scheduleId, today, today)
 		if err != nil {
 			return
 		}
@@ -105,11 +114,12 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 		ScheduleStorageID: scheduleStorage.ID,
 	}).FirstOrCreate(&user)
 
-	botMessage := telegram_api.BotMessage{
-		ChatID: message.Chat.ID,
-		Text:   fmt.Sprintf("Your schedule storage is %s", scheduleStorageName),
+	botEditedMessage := telegram_api.BotEditedMessage{
+		ChatID:    message.Chat.ID,
+		MessageID: (<-botMessageChan).MessageID,
+		Text:      fmt.Sprintf("Your schedule storage is %s", scheduleStorageName),
 	}
-	if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+	if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
 		log.Println(err)
 	}
 }
@@ -134,7 +144,7 @@ func (telegramBot *TelegramBot) handleMessageToday(message *telegram_api.Message
 			ChatID: message.Chat.ID,
 			Text:   scheduleText,
 		}
-		if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 			log.Println(err)
 		}
 		time.Sleep(1 * time.Second)
@@ -162,7 +172,7 @@ func (telegramBot *TelegramBot) handleMessageTomorrow(message *telegram_api.Mess
 			ChatID: message.Chat.ID,
 			Text:   scheduleText,
 		}
-		if _, err := telegram_api.SendMessageFrom(telegramBot.Token, &botMessage); err != nil {
+		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 			log.Println(err)
 		}
 		time.Sleep(1 * time.Second)

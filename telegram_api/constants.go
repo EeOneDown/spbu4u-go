@@ -5,4 +5,5 @@ const (
 	SetWebHookUrl     = BaseUrl + "/setWebhook"
 	GetWebHookInfoUrl = BaseUrl + "/getWebhookInfo"
 	SendMessage       = BaseUrl + "/sendMessage"
+	EditMessageText   = BaseUrl + "/editMessageText"
 )

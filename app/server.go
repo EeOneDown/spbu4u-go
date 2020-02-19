@@ -34,7 +34,7 @@ func InitServerAndListen(db *gorm.DB, telegramBot *TelegramBot) error {
 func (server *Server) getTelegramWebHookInfo(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		webHookInfo, err := telegram_api.GetWebHookInfoFor(server.TelegramBot.Token)
+		webHookInfo, err := server.TelegramBot.Bot.GetWebHookInfo()
 		if err != nil {
 			log.Println(err)
 		}
