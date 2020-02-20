@@ -142,25 +142,26 @@ func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from tim
 		log.Println(err)
 		return
 	}
-	parsed := schedule.Parse()
-	toEdit, toSend := parsed[0], parsed[1:]
+	parsedChan := make(chan string)
+	go schedule.Parse(parsedChan)
+
 	botEditedMessage := telegram_api.BotEditedMessage{
 		ChatID:    chat.ID,
 		MessageID: (<-botMessageChan).MessageID,
-		Text:      toEdit,
+		Text:      <-parsedChan,
 	}
 	if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
 		log.Println(err)
 	}
-	for _, scheduleText := range toSend {
+	for parsed := range parsedChan {
 		botMessage := telegram_api.BotMessage{
 			ChatID: chat.ID,
-			Text:   scheduleText,
+			Text:   parsed,
 		}
 		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 			log.Println(err)
 		}
-		time.Sleep(1 * time.Second)
+		// time.Sleep(1 * time.Second)
 	}
 }
 
