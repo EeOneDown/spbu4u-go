@@ -185,6 +185,13 @@ func (telegramBot *TelegramBot) handleMessageWeek(message *telegram_api.Message)
 	telegramBot.sendScheduleTo(message.Chat, monday, sunday)
 }
 
+func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Message) {
+	today := time.Now()
+	monday := today.AddDate(0, 0, 8-int(today.Weekday()))
+	sunday := monday.AddDate(0, 0, 13)
+	telegramBot.sendScheduleTo(message.Chat, monday, sunday)
+}
+
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	if message.Text == "/start" {
 		telegramBot.handleMessageStart(message)
@@ -196,6 +203,8 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 		telegramBot.handleMessageTomorrow(message)
 	} else if message.Text == "/week" {
 		telegramBot.handleMessageWeek(message)
+	} else if message.Text == "/weeknext" {
+		telegramBot.handleMessageWeekNext(message)
 	} else {
 		log.Println(message.Text)
 	}
