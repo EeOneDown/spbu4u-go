@@ -6,6 +6,17 @@ import (
 	"time"
 )
 
+const (
+	ScheduleStorageTypeGroup uint8 = iota
+	ScheduleStorageTypeEducator
+)
+
+var ScheduleStorageTypeMapper = map[string]uint8{
+	"StudentGroupEvents": ScheduleStorageTypeGroup,
+	"EducatorEvents":     ScheduleStorageTypeEducator,
+	"WeekEducatorEvents": ScheduleStorageTypeEducator,
+}
+
 type ScheduleStorage struct {
 	gorm.Model
 	TimeTableId int64  `gorm:"not null;unique_index:idx_ttid_type"`

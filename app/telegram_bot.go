@@ -161,7 +161,7 @@ func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from tim
 		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 			log.Println(err)
 		}
-		// time.Sleep(1 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
