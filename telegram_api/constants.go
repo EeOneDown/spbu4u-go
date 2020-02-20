@@ -7,3 +7,8 @@ const (
 	SendMessage       = BaseUrl + "/sendMessage"
 	EditMessageText   = BaseUrl + "/editMessageText"
 )
+
+const (
+	ParseModeHTML = "HTML"
+	//ParseModeMarkdown = "Markdown"
+)

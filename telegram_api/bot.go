@@ -72,7 +72,7 @@ func (bot *Bot) SendMessage(message *BotMessage) (*Message, error) {
 	return messageResponse.Result, nil
 }
 
-func (bot *Bot) SendMessageToEdit(message *BotMessage, ch chan<- *Message) error {
+func (bot *Bot) SendMessageToEdit(message *BotMessage, botMessageChan chan<- *Message) error {
 	type MessageResponse struct {
 		Ok     bool     `json:"ok"`
 		Result *Message `json:"result"`
@@ -94,7 +94,8 @@ func (bot *Bot) SendMessageToEdit(message *BotMessage, ch chan<- *Message) error
 	if err := json.Unmarshal(body, &messageResponse); err != nil {
 		return err
 	}
-	ch <- messageResponse.Result
+	botMessageChan <- messageResponse.Result
+	close(botMessageChan)
 	return nil
 }
 

@@ -149,14 +149,16 @@ func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from tim
 		ChatID:    chat.ID,
 		MessageID: (<-botMessageChan).MessageID,
 		Text:      <-parsedChan,
+		ParseMode: telegram_api.ParseModeHTML,
 	}
 	if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
 		log.Println(err)
 	}
 	for parsed := range parsedChan {
 		botMessage := telegram_api.BotMessage{
-			ChatID: chat.ID,
-			Text:   parsed,
+			ChatID:    chat.ID,
+			Text:      parsed,
+			ParseMode: telegram_api.ParseModeHTML,
 		}
 		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 			log.Println(err)

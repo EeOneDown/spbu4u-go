@@ -108,3 +108,36 @@ func TestFindScheduleFromWeekEducatorUrl(t *testing.T) {
 		}
 	}
 }
+
+func TestRegExpSubjectNoComma(t *testing.T) {
+	t.Parallel()
+	subject := "Вычислительные методы в гидродинамике и теории волн"
+	goodSubject := "Вычислительные методы в гидродинамике и теории волн"
+	goodType := ""
+	match := RegExpSubject.FindStringSubmatch(subject)
+	if match == nil || len(match) != 3 || match[1] != goodSubject || match[2] != goodType {
+		t.Fail()
+	}
+}
+
+func TestRegExpSubjectOneComma(t *testing.T) {
+	t.Parallel()
+	subject := "Вычислительные методы в гидродинамике и теории волн, практическое занятие в присутствии преподавателя"
+	goodSubject := "Вычислительные методы в гидродинамике и теории волн"
+	goodType := "практическое занятие в присутствии преподавателя"
+	match := RegExpSubject.FindStringSubmatch(subject)
+	if match == nil || len(match) != 3 || match[1] != goodSubject || match[2] != goodType {
+		t.Fail()
+	}
+}
+
+func TestRegExpSubjectSeveralCommas(t *testing.T) {
+	t.Parallel()
+	subject := "Вычислительные методы в гидродинамике и теории волн, лекция, лекция, лекция"
+	goodSubject := "Вычислительные методы в гидродинамике и теории волн, лекция, лекция"
+	goodType := "лекция"
+	match := RegExpSubject.FindStringSubmatch(subject)
+	if match == nil || len(match) != 3 || match[1] != goodSubject || match[2] != goodType {
+		t.Fail()
+	}
+}
