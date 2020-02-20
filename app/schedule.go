@@ -28,11 +28,10 @@ func (notRegistered *NotRegistered) Parse(parsedChan chan<- string) {
 func parseTime(event *spbu_api.Event, timeChan chan<- string) {
 	start := time.Time(event.Start)
 	end := time.Time(event.End)
-	timeChan <- fmt.Sprintf("%s %02d:%02d%s%02d:%02d",
+	timeChan <- fmt.Sprintf("%s %02d:%02d - %02d:%02d",
 		EmojiClock3,
 		start.Hour(),
 		start.Minute(),
-		SymbolEnDash,
 		end.Hour(),
 		end.Minute(),
 	)
