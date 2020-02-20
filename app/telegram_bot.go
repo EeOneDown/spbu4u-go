@@ -188,7 +188,7 @@ func (telegramBot *TelegramBot) handleMessageWeek(message *telegram_api.Message)
 func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Message) {
 	today := time.Now()
 	monday := today.AddDate(0, 0, 8-int(today.Weekday()))
-	sunday := monday.AddDate(0, 0, 13)
+	sunday := monday.AddDate(0, 0, 6)
 	telegramBot.sendScheduleTo(message.Chat, monday, sunday)
 }
 
