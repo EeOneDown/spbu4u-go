@@ -51,7 +51,6 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 }
 
 func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message) {
-	log.Println(message.Chat)
 	botMessage := telegram_api.BotMessage{
 		ChatID: message.Chat.ID,
 		Text: "Send me your schedule link from the timetable.spbu.ru\n" +
@@ -195,7 +194,16 @@ func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Mess
 }
 
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
-	if message.Text == "/start" {
+	// todo: remove after release
+	if match := RegExpAllowedTgID.FindStringSubmatch(strconv.FormatInt(message.Chat.ID, 10)); match == nil {
+		botMessage := telegram_api.BotMessage{
+			ChatID: message.Chat.ID,
+			Text:   "This is a test bot. Please contact the developer to get access.",
+		}
+		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
+			log.Println(err)
+		}
+	} else if message.Text == "/start" {
 		telegramBot.handleMessageStart(message)
 	} else if match := RegExpScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
 		telegramBot.handleMessageRegisterUrl(message, match...)
