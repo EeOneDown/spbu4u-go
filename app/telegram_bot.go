@@ -4,12 +4,50 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"log"
+	"math/rand"
 	"os"
 	"spbu4u-go/spbu_api"
 	"spbu4u-go/telegram_api"
 	"strconv"
 	"time"
 )
+
+const (
+	BotTextDisclaimer = "Это <b>тестовый</b> бот. Для получения доступа свяжитесь с разработчиком."
+	BotTextStart      = "Для регистрации отправь мне ссылку на твое расписание на timetable.spbu.ru\n\n" +
+		"Например: https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508"
+	BotTextRegistering             = "Определяю расписание..."
+	BotTextRegisterSuccess         = "Твое расписание: <b>%s</b>"
+	BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
+)
+
+var (
+	BotTextSearching = [...]string{
+		"Смотрю расписание...",
+		"Смотрю расписание на timetable.spbu.ru...",
+		"Хоть бы выходной...",
+	}
+	BotTextUnknownMessageReaction = [...]string{
+		"Не понимаю.",
+		"А вот сейчас вообще не понял.",
+		"Я бы тебе ответил, да законы робототехники не позволяют.",
+		"Я хотел что-то ответить, но забыл что.",
+		"Увы, я не чат бот. Давай только по делу.",
+	}
+)
+
+func getFunnySearchingText(from time.Time, to time.Time) string {
+	if from.Weekday() == time.Sunday && to.YearDay()-from.YearDay() == 1 {
+		return BotTextSundayScheduleSearching
+	}
+	rand.Seed(time.Now().Unix())
+	return BotTextSearching[rand.Intn(len(BotTextSearching))]
+}
+
+func getFunnyUnknownMessageText() string {
+	rand.Seed(time.Now().Unix())
+	return BotTextUnknownMessageReaction[rand.Intn(len(BotTextUnknownMessageReaction))]
+}
 
 type TelegramBot struct {
 	DB  *gorm.DB
@@ -50,11 +88,21 @@ func (telegramBot *TelegramBot) setWebHook(domain string) {
 	}
 }
 
+func (telegramBot *TelegramBot) handleNotAllowed(message *telegram_api.Message) {
+	botMessage := telegram_api.BotMessage{
+		ChatID:    message.Chat.ID,
+		Text:      BotTextDisclaimer,
+		ParseMode: telegram_api.ParseModeHTML,
+	}
+	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
 func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message) {
 	botMessage := telegram_api.BotMessage{
 		ChatID: message.Chat.ID,
-		Text: "Send me your schedule link from the timetable.spbu.ru\n" +
-			"e.g. https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508",
+		Text:   BotTextStart,
 	}
 	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 		log.Println(err)
@@ -66,7 +114,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	go func() {
 		botMessage := &telegram_api.BotMessage{
 			ChatID: message.Chat.ID,
-			Text:   "Registering...",
+			Text:   BotTextRegistering,
 		}
 		if err := telegramBot.Bot.SendMessageToEdit(botMessage, botMessageChan); err != nil {
 			log.Println(err)
@@ -116,7 +164,8 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	botEditedMessage := telegram_api.BotEditedMessage{
 		ChatID:    message.Chat.ID,
 		MessageID: (<-botMessageChan).MessageID,
-		Text:      fmt.Sprintf("Your schedule storage is %s", scheduleStorageName),
+		Text:      fmt.Sprintf(BotTextRegisterSuccess, scheduleStorageName),
+		ParseMode: telegram_api.ParseModeHTML,
 	}
 	if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
 		log.Println(err)
@@ -128,7 +177,7 @@ func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from tim
 	go func() {
 		botMessage := &telegram_api.BotMessage{
 			ChatID: chat.ID,
-			Text:   "Searching...",
+			Text:   getFunnySearchingText(from, to),
 		}
 		if err := telegramBot.Bot.SendMessageToEdit(botMessage, botMessageChan); err != nil {
 			log.Println(err)
@@ -193,16 +242,21 @@ func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Mess
 	telegramBot.sendScheduleTo(message.Chat, monday, sunday)
 }
 
+func (telegramBot *TelegramBot) handleMessageUnknown(message *telegram_api.Message) {
+	botMessage := telegram_api.BotMessage{
+		ChatID:    message.Chat.ID,
+		Text:      getFunnyUnknownMessageText(),
+		ParseMode: telegram_api.ParseModeHTML,
+	}
+	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
 func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	// todo: remove after release
 	if match := RegExpAllowedTgID.FindStringSubmatch(strconv.FormatInt(message.Chat.ID, 10)); match == nil {
-		botMessage := telegram_api.BotMessage{
-			ChatID: message.Chat.ID,
-			Text:   "This is a test bot. Please contact the developer to get access.",
-		}
-		if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
-			log.Println(err)
-		}
+		telegramBot.handleNotAllowed(message)
 	} else if message.Text == "/start" {
 		telegramBot.handleMessageStart(message)
 	} else if match := RegExpScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {

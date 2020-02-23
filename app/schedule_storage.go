@@ -30,7 +30,7 @@ func (scheduleStorage *ScheduleStorage) GetSchedule(from time.Time, to time.Time
 	case ScheduleStorageTypeGroup:
 		groupEvents, err := spbu_api.GetGroupScheduleFor(scheduleStorage.TimeTableId, from, to)
 		if err != nil {
-			var scheduleNotAllowed *ScheduleNotAllowed
+			var scheduleNotAllowed *ScheduleNotAvailable
 			var schedule Schedule = scheduleNotAllowed
 			return schedule, err
 		}
@@ -39,14 +39,14 @@ func (scheduleStorage *ScheduleStorage) GetSchedule(from time.Time, to time.Time
 	case ScheduleStorageTypeEducator:
 		educatorEvents, err := spbu_api.GetEducatorScheduleFor(scheduleStorage.TimeTableId, from, to)
 		if err != nil {
-			var scheduleNotAllowed *ScheduleNotAllowed
+			var scheduleNotAllowed *ScheduleNotAvailable
 			var schedule Schedule = scheduleNotAllowed
 			return schedule, err
 		}
 		var schedule Schedule = (*EducatorEvents)(educatorEvents)
 		return schedule, nil
 	default:
-		var notRegistered *NotRegistered
+		var notRegistered *ScheduleNotAllowed
 		var schedule Schedule = notRegistered
 		return schedule, nil
 	}

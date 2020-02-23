@@ -10,24 +10,31 @@ import (
 const (
 	EmojiCalendar = "\U0001F4C5"
 	EmojiClock3   = "\U0001F552"
-	//EmojiSleeping = "\U0001F634"
+	EmojiSleeping = "\U0001F634"
+)
+
+const (
+	BotTextScheduleServerIsNotAvailable = "Не удается получить расписание с timetable.spbu.ru." +
+		" Возможно, TimeTable временно отключен."
+	BotTextScheduleIsNotAllowed = "Просмотр расписания недоступен. Отправь timetable.spbu.ru ссылку на свое расписание."
+	BotTextWeekend              = EmojiSleeping + " Выходной"
 )
 
 type Schedule interface {
 	Parse(parsedChan chan<- string)
 }
 
-type ScheduleNotAllowed int
+type ScheduleNotAvailable int
 
-func (scheduleNotAllowed *ScheduleNotAllowed) Parse(parsedChan chan<- string) {
-	parsedChan <- "I can't get schedule from the timetable.spbu.ru. Perhaps the TimeTable server is down."
+func (scheduleNotAvailable *ScheduleNotAvailable) Parse(parsedChan chan<- string) {
+	parsedChan <- BotTextScheduleServerIsNotAvailable
 	close(parsedChan)
 }
 
-type NotRegistered int
+type ScheduleNotAllowed int
 
-func (notRegistered *NotRegistered) Parse(parsedChan chan<- string) {
-	parsedChan <- "Schedule is not allowed for you. Please register via the timetable.spbu.ru schedule link."
+func (scheduleNotAllowed *ScheduleNotAllowed) Parse(parsedChan chan<- string) {
+	parsedChan <- BotTextScheduleIsNotAllowed
 	close(parsedChan)
 }
 
@@ -58,6 +65,12 @@ func parseSubject(event *spbu_api.Event, subjectChan chan<- string) {
 		subjectTypeShort = "Л"
 	case "практическое занятие":
 		subjectTypeShort = "ПР"
+	case "семинар":
+		subjectTypeShort = "С"
+	case "сам. работа в присутствии преподавателя":
+		subjectTypeShort = "СР"
+	case "консультация групповая":
+		subjectTypeShort = "КОНС"
 	// todo: add more
 	default:
 		subjectTypeShort = strings.ToUpper(subjectType)
@@ -115,7 +128,7 @@ func (groupEvents *GroupEvents) Parse(parsedChan chan<- string) {
 		parsedChan <- fmt.Sprintf("%s %s\n\n%s", EmojiCalendar, strings.Title(day.DayString), dayParsed)
 	}
 	if parsedCount == 0 {
-		parsedChan <- "Nothing to display."
+		parsedChan <- BotTextWeekend
 	}
 	close(parsedChan)
 }
@@ -157,7 +170,7 @@ func (educatorEvents *EducatorEvents) Parse(parsedChan chan<- string) {
 		parsedChan <- fmt.Sprintf("%s %s\n\n%s", EmojiCalendar, strings.Title(day.DayString), dayParsed)
 	}
 	if parsedCount == 0 {
-		parsedChan <- "Nothing to display."
+		parsedChan <- BotTextWeekend
 	}
 	close(parsedChan)
 }
