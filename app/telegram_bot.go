@@ -25,7 +25,7 @@ var (
 	BotTextSearching = [...]string{
 		"Смотрю расписание...",
 		"Смотрю расписание на timetable.spbu.ru...",
-		"Хоть бы выходной...",
+		"Ищу... Хоть бы выходной...",
 	}
 	BotTextUnknownMessageReaction = [...]string{
 		"Не понимаю.",
@@ -270,7 +270,7 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	} else if message.Text == "/weeknext" {
 		telegramBot.handleMessageWeekNext(message)
 	} else {
-		log.Println(message.Text)
+		telegramBot.handleMessageUnknown(message)
 	}
 }
 
