@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ScheduleStorageTypeGroup uint8 = iota
+	ScheduleStorageTypeGroup uint8 = iota + 1
 	ScheduleStorageTypeEducator
 )
 
@@ -26,11 +26,8 @@ type ScheduleStorage struct {
 }
 
 func (scheduleStorage *ScheduleStorage) GetSchedule(from time.Time, to time.Time) (Schedule, error) {
-	if scheduleStorage.ID == 0 {
-		var notRegistered *NotRegistered
-		var schedule Schedule = notRegistered
-		return schedule, nil
-	} else if scheduleStorage.Type == ScheduleStorageTypeGroup {
+	switch scheduleStorage.Type {
+	case ScheduleStorageTypeGroup:
 		groupEvents, err := spbu_api.GetGroupScheduleFor(scheduleStorage.TimeTableId, from, to)
 		if err != nil {
 			var scheduleNotAllowed *ScheduleNotAllowed
@@ -39,7 +36,7 @@ func (scheduleStorage *ScheduleStorage) GetSchedule(from time.Time, to time.Time
 		}
 		var schedule Schedule = (*GroupEvents)(groupEvents)
 		return schedule, nil
-	} else {
+	case ScheduleStorageTypeEducator:
 		educatorEvents, err := spbu_api.GetEducatorScheduleFor(scheduleStorage.TimeTableId, from, to)
 		if err != nil {
 			var scheduleNotAllowed *ScheduleNotAllowed
@@ -47,6 +44,10 @@ func (scheduleStorage *ScheduleStorage) GetSchedule(from time.Time, to time.Time
 			return schedule, err
 		}
 		var schedule Schedule = (*EducatorEvents)(educatorEvents)
+		return schedule, nil
+	default:
+		var notRegistered *NotRegistered
+		var schedule Schedule = notRegistered
 		return schedule, nil
 	}
 }
