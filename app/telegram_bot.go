@@ -214,6 +214,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
 		log.Println(err)
 	}
+	telegramBot.sendMainMenuTo(message.Chat)
 }
 
 func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from time.Time, to time.Time) {
