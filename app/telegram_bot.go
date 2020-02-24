@@ -16,10 +16,20 @@ const (
 	BotTextDisclaimer = "Это <b>тестовый</b> бот. Для получения доступа свяжитесь с разработчиком."
 	BotTextStart      = "Для регистрации отправь мне ссылку на твое расписание на timetable.spbu.ru\n\n" +
 		"Например: https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508"
-	BotTextRegistering             = "Определяю расписание..."
-	BotTextRegisterSuccess         = "Твое расписание: <b>%s</b>"
-	BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
+	BotTextRegistering     = "Определяю расписание..."
+	BotTextRegisterSuccess = "Твое расписание: <b>%s</b>"
+	BotTextMainMenu        = "Главное меню"
 )
+
+const (
+	BotCommandStart    = "/start"
+	BotCommandToday    = "/today"
+	BotCommandTomorrow = "/tomorrow"
+	BotCommandWeek     = "/week"
+	BotCommandWeekNext = "/weeknext"
+)
+
+const BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
 
 var (
 	BotTextSearching = [...]string{
@@ -122,6 +132,23 @@ func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message
 		Text:   BotTextStart,
 	}
 	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
+func (telegramBot *TelegramBot) sendMainMenuTo(chat *telegram_api.Chat) {
+	botMessage := &telegram_api.BotMessage{
+		ChatID: chat.ID,
+		Text:   BotTextMainMenu,
+		ReplyMarkup: telegram_api.ReplyMarkup{
+			Keyboard: [][]telegram_api.KeyboardButton{
+				{{Text: BotCommandToday}, {Text: BotCommandTomorrow}, {Text: BotCommandWeek}},
+				{{Text: BotCommandStart}, {Text: BotCommandWeekNext}},
+			},
+			ResizeKeyboard: true,
+		},
+	}
+	if _, err := telegramBot.Bot.SendMessage(botMessage); err != nil {
 		log.Println(err)
 	}
 }
@@ -274,17 +301,17 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	// todo: remove after release
 	if match := RegExpAllowedTgID.FindStringSubmatch(strconv.FormatInt(message.Chat.ID, 10)); match == nil {
 		telegramBot.handleNotAllowed(message)
-	} else if message.Text == "/start" {
+	} else if message.Text == BotCommandStart {
 		telegramBot.handleMessageStart(message)
 	} else if match := RegExpScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
 		telegramBot.handleMessageRegisterUrl(message, match...)
-	} else if message.Text == "/today" {
+	} else if message.Text == BotCommandToday {
 		telegramBot.handleMessageToday(message)
-	} else if message.Text == "/tomorrow" {
+	} else if message.Text == BotCommandTomorrow {
 		telegramBot.handleMessageTomorrow(message)
-	} else if message.Text == "/week" {
+	} else if message.Text == BotCommandWeek {
 		telegramBot.handleMessageWeek(message)
-	} else if message.Text == "/weeknext" {
+	} else if message.Text == BotCommandWeekNext {
 		telegramBot.handleMessageWeekNext(message)
 	} else {
 		telegramBot.handleMessageUnknown(message)

@@ -9,6 +9,11 @@ const (
 )
 
 const (
+//KeyboardButtonPollTypeQuiz = "quiz"
+//KeyboardButtonPollTypeRegular = "regular"
+)
+
+const (
 	ParseModeHTML = "HTML"
 	//ParseModeMarkdown = "Markdown"
 )
