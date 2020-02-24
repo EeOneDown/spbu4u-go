@@ -140,7 +140,7 @@ func (telegramBot *TelegramBot) sendMainMenuTo(chat *telegram_api.Chat) {
 	botMessage := &telegram_api.BotMessage{
 		ChatID: chat.ID,
 		Text:   BotTextMainMenu,
-		ReplyMarkup: telegram_api.ReplyMarkup{
+		ReplyMarkup: &telegram_api.ReplyMarkup{
 			Keyboard: [][]telegram_api.KeyboardButton{
 				{{Text: BotCommandToday}, {Text: BotCommandTomorrow}, {Text: BotCommandWeek}},
 				{{Text: BotCommandStart}, {Text: BotCommandWeekNext}},
