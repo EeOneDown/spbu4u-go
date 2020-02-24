@@ -25,27 +25,44 @@ var (
 	BotTextSearching = [...]string{
 		"Смотрю расписание...",
 		"Смотрю расписание на timetable.spbu.ru...",
+	}
+	BotTextSearchingFun = [...]string{
 		"Ищу... Хоть бы выходной...",
+		"Поиск расписания активирован...",
+		"Призываю Богиню расписания Шедьюлу...",
+		"Ахахахаха. Там такое! Не мог не поделиться с другими ботами. Секунду...",
+		"Обычно, я рассказываю шутку, но я уже нашёл расписание. Вот оно...",
+		"Отправил твое расписание в другой чат. Сейчас извинюсь и отправлю уже тебе...",
 	}
 	BotTextUnknownMessageReaction = [...]string{
 		"Не понимаю.",
+		"С такой командой я еще не знаком.",
+	}
+	BotTextUnknownMessageReactionFun = [...]string{
 		"А вот сейчас вообще не понял.",
 		"Я бы тебе ответил, да законы робототехники не позволяют.",
 		"Я хотел что-то ответить, но забыл что.",
 		"Увы, я не чат бот. Давай только по делу.",
+		"Когда-то давно, четыре народа жили в мире. Но все изменилось, когда ты начал спамить непонятными сообщениями.",
 	}
 )
 
-func getFunnySearchingText(from time.Time, to time.Time) string {
+func getSearchingText(from time.Time, to time.Time) string {
 	if from.Weekday() == time.Sunday && to.YearDay()-from.YearDay() == 1 {
 		return BotTextSundayScheduleSearching
 	}
 	rand.Seed(time.Now().Unix())
+	if chance := rand.Intn(100); chance < 20 {
+		return BotTextSearchingFun[rand.Intn(len(BotTextSearchingFun))]
+	}
 	return BotTextSearching[rand.Intn(len(BotTextSearching))]
 }
 
-func getFunnyUnknownMessageText() string {
+func getUnknownMessageText() string {
 	rand.Seed(time.Now().Unix())
+	if chance := rand.Intn(100); chance < 20 {
+		return BotTextUnknownMessageReactionFun[rand.Intn(len(BotTextUnknownMessageReactionFun))]
+	}
 	return BotTextUnknownMessageReaction[rand.Intn(len(BotTextUnknownMessageReaction))]
 }
 
@@ -177,7 +194,7 @@ func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from tim
 	go func() {
 		botMessage := &telegram_api.BotMessage{
 			ChatID: chat.ID,
-			Text:   getFunnySearchingText(from, to),
+			Text:   getSearchingText(from, to),
 		}
 		if err := telegramBot.Bot.SendMessageToEdit(botMessage, botMessageChan); err != nil {
 			log.Println(err)
@@ -245,7 +262,7 @@ func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Mess
 func (telegramBot *TelegramBot) handleMessageUnknown(message *telegram_api.Message) {
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
-		Text:      getFunnyUnknownMessageText(),
+		Text:      getUnknownMessageText(),
 		ParseMode: telegram_api.ParseModeHTML,
 	}
 	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
