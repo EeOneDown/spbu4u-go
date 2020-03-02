@@ -61,6 +61,8 @@ var (
 var (
 	BotTodayTextPattern    = regexp.MustCompile(`(?im)^/today|сегодня$`)
 	BotTomorrowTextPattern = regexp.MustCompile(`(?im)^/tomorrow|завтра$`)
+	BotWeekTextPattern     = regexp.MustCompile(`(?im)^/week|вся неделя$`)
+	BotWeekNextTextPattern = regexp.MustCompile(`(?im)^/weeknext|вся неделя след(?:ующая)?$`)
 )
 
 func getSearchingText(from time.Time, to time.Time) string {
@@ -308,18 +310,25 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	// todo: remove after release
 	if match := RegExpAllowedTgID.FindStringSubmatch(strconv.FormatInt(message.Chat.ID, 10)); match == nil {
 		telegramBot.handleNotAllowed(message)
+		// start
 	} else if message.Text == BotCommandStart {
 		telegramBot.handleMessageStart(message)
+		// register url
 	} else if match := RegExpScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
 		telegramBot.handleMessageRegisterUrl(message, match...)
+		// today
 	} else if match := BotTodayTextPattern.FindStringSubmatch(message.Text); match != nil {
 		telegramBot.handleMessageToday(message)
+		// tomorrow
 	} else if match := BotTomorrowTextPattern.FindStringSubmatch(message.Text); match != nil {
 		telegramBot.handleMessageTomorrow(message)
-	} else if message.Text == BotCommandWeek {
+		// full week
+	} else if match := BotWeekTextPattern.FindStringSubmatch(message.Text); match != nil {
 		telegramBot.handleMessageWeek(message)
-	} else if message.Text == BotCommandWeekNext {
+		// full next week
+	} else if match := BotWeekNextTextPattern.FindStringSubmatch(message.Text); match != nil {
 		telegramBot.handleMessageWeekNext(message)
+		// unknown
 	} else {
 		telegramBot.handleMessageUnknown(message)
 	}
