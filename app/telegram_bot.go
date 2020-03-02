@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"regexp"
 	"spbu4u-go/spbu_api"
 	"spbu4u-go/telegram_api"
 	"strconv"
@@ -22,11 +23,12 @@ const (
 )
 
 const (
-	BotCommandStart    = "/start"
-	BotCommandToday    = "/today"
-	BotCommandTomorrow = "/tomorrow"
-	BotCommandWeek     = "/week"
-	BotCommandWeekNext = "/weeknext"
+	BotCommandStart      = "/start"
+	BotCommandToday      = "/today"
+	BotCommandTodayHuman = "Сегодня"
+	BotCommandTomorrow   = "/tomorrow"
+	BotCommandWeek       = "/week"
+	BotCommandWeekNext   = "/weeknext"
 )
 
 const BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
@@ -55,6 +57,10 @@ var (
 		"Увы, я не чат бот. Давай только по делу.",
 		"Когда-то давно, четыре народа жили в мире. Но все изменилось, когда ты начал спамить непонятными сообщениями.",
 	}
+)
+
+var (
+	BotTodayTextPattern = regexp.MustCompile(`(?im)^/today|сегодня$`)
 )
 
 func getSearchingText(from time.Time, to time.Time) string {
@@ -306,7 +312,7 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 		telegramBot.handleMessageStart(message)
 	} else if match := RegExpScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
 		telegramBot.handleMessageRegisterUrl(message, match...)
-	} else if message.Text == BotCommandToday {
+	} else if match := BotTodayTextPattern.FindStringSubmatch(message.Text); match != nil {
 		telegramBot.handleMessageToday(message)
 	} else if message.Text == BotCommandTomorrow {
 		telegramBot.handleMessageTomorrow(message)
