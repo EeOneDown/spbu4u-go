@@ -23,12 +23,11 @@ const (
 )
 
 const (
-	BotCommandStart      = "/start"
-	BotCommandToday      = "/today"
-	BotCommandTodayHuman = "Сегодня"
-	BotCommandTomorrow   = "/tomorrow"
-	BotCommandWeek       = "/week"
-	BotCommandWeekNext   = "/weeknext"
+	BotCommandStart    = "/start"
+	BotCommandToday    = "/today"
+	BotCommandTomorrow = "/tomorrow"
+	BotCommandWeek     = "/week"
+	BotCommandWeekNext = "/weeknext"
 )
 
 const BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
@@ -60,7 +59,8 @@ var (
 )
 
 var (
-	BotTodayTextPattern = regexp.MustCompile(`(?im)^/today|сегодня$`)
+	BotTodayTextPattern    = regexp.MustCompile(`(?im)^/today|сегодня$`)
+	BotTomorrowTextPattern = regexp.MustCompile(`(?im)^/tomorrow|завтра$`)
 )
 
 func getSearchingText(from time.Time, to time.Time) string {
@@ -314,7 +314,7 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 		telegramBot.handleMessageRegisterUrl(message, match...)
 	} else if match := BotTodayTextPattern.FindStringSubmatch(message.Text); match != nil {
 		telegramBot.handleMessageToday(message)
-	} else if message.Text == BotCommandTomorrow {
+	} else if match := BotTomorrowTextPattern.FindStringSubmatch(message.Text); match != nil {
 		telegramBot.handleMessageTomorrow(message)
 	} else if message.Text == BotCommandWeek {
 		telegramBot.handleMessageWeek(message)
