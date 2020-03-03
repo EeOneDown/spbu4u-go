@@ -92,43 +92,43 @@ var RegExpAllowedTgID = regexp.MustCompile(os.Getenv("ALLOWED_TG_ID"))
 type BotMessageHandler struct {
 	RegExp       *regexp.Regexp
 	RegExpGroups int
-	Handler      func(TelegramBot, *telegram_api.Message)
+	Handler      func(*TelegramBot, *telegram_api.Message)
 }
 
-const (
-	//MessageHandlerStart = iota
-	MessageHandlerRegisterUrl = iota + 1
-	//MessageHandlerToday
-	//MessageHandlerTomorrow
-	//MessageHandlerWeek
-	//MessageHandlerWeekNext
+var (
+	RegExpStart       = regexp.MustCompile(`(?im)^/start$`)
+	RegExpRegisterUrl = regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`)
+	RegExpToday       = regexp.MustCompile(`(?im)^/today|сегодня$`)
+	RegExpTomorrow    = regexp.MustCompile(`(?im)^/tomorrow|завтра$`)
+	RegExpWeek        = regexp.MustCompile(`(?im)^/week|вся неделя$`)
+	RegExpWeekNext    = regexp.MustCompile(`(?im)^/weeknext|вся неделя след(?:ующая)?$`)
 )
 
 var BotMessageHandlers = []BotMessageHandler{
 	{
-		RegExp:  regexp.MustCompile(`(?im)^/start$`),
-		Handler: TelegramBot.handleMessageStart,
+		RegExp:  RegExpStart,
+		Handler: (*TelegramBot).handleMessageStart,
 	},
 	{
-		RegExp:       regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`),
+		RegExp:       RegExpRegisterUrl,
 		RegExpGroups: 2,
-		Handler:      TelegramBot.handleMessageRegisterUrl,
+		Handler:      (*TelegramBot).handleMessageRegisterUrl,
 	},
 	{
-		RegExp:  regexp.MustCompile(`(?im)^/today|сегодня$`),
-		Handler: TelegramBot.handleMessageToday,
+		RegExp:  RegExpToday,
+		Handler: (*TelegramBot).handleMessageToday,
 	},
 	{
-		RegExp:  regexp.MustCompile(`(?im)^/tomorrow|завтра$`),
-		Handler: TelegramBot.handleMessageTomorrow,
+		RegExp:  RegExpTomorrow,
+		Handler: (*TelegramBot).handleMessageTomorrow,
 	},
 	{
-		RegExp:  regexp.MustCompile(`(?im)^/week|вся неделя$`),
-		Handler: TelegramBot.handleMessageWeek,
+		RegExp:  RegExpWeek,
+		Handler: (*TelegramBot).handleMessageWeek,
 	},
 	{
-		RegExp:  regexp.MustCompile(`(?im)^/weeknext|вся неделя след(?:ующая)?$`),
-		Handler: TelegramBot.handleMessageWeekNext,
+		RegExp:  RegExpWeekNext,
+		Handler: (*TelegramBot).handleMessageWeekNext,
 	},
 }
 
@@ -236,7 +236,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 			log.Println(err)
 		}
 	}()
-	match := BotMessageHandlers[MessageHandlerRegisterUrl].RegExp.FindStringSubmatch(message.Text)
+	match := RegExpRegisterUrl.FindStringSubmatch(message.Text)
 	typeStr := match[1]
 	scheduleId, err := strconv.ParseInt(match[2], 10, 64)
 	if err != nil {
@@ -381,7 +381,7 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	for _, botMessageHandler := range BotMessageHandlers {
 		match := botMessageHandler.RegExp.FindStringSubmatch(message.Text)
 		if match != nil && len(match) == botMessageHandler.RegExpGroups+1 {
-			botMessageHandler.Handler(*telegramBot, message)
+			botMessageHandler.Handler(telegramBot, message)
 			return
 		}
 	}
