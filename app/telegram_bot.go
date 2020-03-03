@@ -11,7 +11,6 @@ import (
 	"spbu4u-go/telegram_api"
 	"strconv"
 	"time"
-	"unicode/utf8"
 )
 
 const (
@@ -25,7 +24,7 @@ const (
 
 const (
 	EmojiInformationSource = "\U00002139"
-	EmojiStar              = "\U00002B50"
+	EmojiStar              = "\u2b50\ufe0f"
 	EmojiGear              = "\U00002699"
 	EmojiStation           = "\U0001F689"
 	EmojiMemo              = "\U0001F4DD"
@@ -362,7 +361,7 @@ func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Mess
 }
 
 func (telegramBot *TelegramBot) handleMessageUnknown(message *telegram_api.Message) {
-	log.Println(utf8.DecodeRuneInString(message.Text))
+	log.Println(message.Text)
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
 		Text:      getUnknownMessageText(),
