@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"regexp"
 	"spbu4u-go/spbu_api"
 	"strings"
 	"time"
@@ -19,6 +20,8 @@ const (
 	BotTextScheduleIsNotAllowed = "Просмотр расписания недоступен. Отправь timetable.spbu.ru ссылку на свое расписание."
 	BotTextWeekend              = EmojiSleeping + " Выходной"
 )
+
+var RegExpSubject = regexp.MustCompile(`^(.*?)(?:, ([^,]*))?$`)
 
 type Schedule interface {
 	Parse(parsedChan chan<- string)

@@ -23,10 +23,6 @@ const (
 )
 
 const (
-	BotCommandStart = "/start"
-)
-
-const (
 	EmojiInformationSource = "\U00002139"
 	EmojiStar              = "\U00002B50"
 	EmojiGear              = "\U00002699"
@@ -91,12 +87,50 @@ var BotKeyboards = [2]BotKeyboard{
 	},
 }
 
-var (
-	BotTodayTextPattern    = regexp.MustCompile(`(?im)^/today|сегодня$`)
-	BotTomorrowTextPattern = regexp.MustCompile(`(?im)^/tomorrow|завтра$`)
-	BotWeekTextPattern     = regexp.MustCompile(`(?im)^/week|вся неделя$`)
-	BotWeekNextTextPattern = regexp.MustCompile(`(?im)^/weeknext|вся неделя след(?:ующая)?$`)
+var RegExpAllowedTgID = regexp.MustCompile(os.Getenv("ALLOWED_TG_ID"))
+
+type BotMessageHandler struct {
+	RegExp       *regexp.Regexp
+	RegExpGroups int
+	Handler      func(TelegramBot, *telegram_api.Message)
+}
+
+const (
+	//MessageHandlerStart = iota
+	MessageHandlerRegisterUrl = iota + 1
+	//MessageHandlerToday
+	//MessageHandlerTomorrow
+	//MessageHandlerWeek
+	//MessageHandlerWeekNext
 )
+
+var BotMessageHandlers = []BotMessageHandler{
+	{
+		RegExp:  regexp.MustCompile(`(?im)^/start$`),
+		Handler: TelegramBot.handleMessageStart,
+	},
+	{
+		RegExp:       regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`),
+		RegExpGroups: 2,
+		Handler:      TelegramBot.handleMessageRegisterUrl,
+	},
+	{
+		RegExp:  regexp.MustCompile(`(?im)^/today|сегодня$`),
+		Handler: TelegramBot.handleMessageToday,
+	},
+	{
+		RegExp:  regexp.MustCompile(`(?im)^/tomorrow|завтра$`),
+		Handler: TelegramBot.handleMessageTomorrow,
+	},
+	{
+		RegExp:  regexp.MustCompile(`(?im)^/week|вся неделя$`),
+		Handler: TelegramBot.handleMessageWeek,
+	},
+	{
+		RegExp:  regexp.MustCompile(`(?im)^/weeknext|вся неделя след(?:ующая)?$`),
+		Handler: TelegramBot.handleMessageWeekNext,
+	},
+}
 
 func getSearchingText(from time.Time, to time.Time) string {
 	if from.Weekday() == time.Sunday && to.YearDay()-from.YearDay() == 1 {
@@ -191,7 +225,7 @@ func (telegramBot *TelegramBot) sendKeyboardTo(chat *telegram_api.Chat, keyboard
 	}
 }
 
-func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.Message, match ...string) {
+func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.Message) {
 	botMessageChan := make(chan *telegram_api.Message, 1)
 	go func() {
 		botMessage := &telegram_api.BotMessage{
@@ -202,6 +236,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 			log.Println(err)
 		}
 	}()
+	match := BotMessageHandlers[MessageHandlerRegisterUrl].RegExp.FindStringSubmatch(message.Text)
 	typeStr := match[1]
 	scheduleId, err := strconv.ParseInt(match[2], 10, 64)
 	if err != nil {
@@ -326,6 +361,7 @@ func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Mess
 }
 
 func (telegramBot *TelegramBot) handleMessageUnknown(message *telegram_api.Message) {
+	log.Println(message.Text)
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
 		Text:      getUnknownMessageText(),
@@ -340,28 +376,16 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 	// todo: remove after release
 	if match := RegExpAllowedTgID.FindStringSubmatch(strconv.FormatInt(message.Chat.ID, 10)); match == nil {
 		telegramBot.handleNotAllowed(message)
-		// start
-	} else if message.Text == BotCommandStart {
-		telegramBot.handleMessageStart(message)
-		// register url
-	} else if match := RegExpScheduleLink.FindStringSubmatch(message.Text); match != nil && len(match) == 3 {
-		telegramBot.handleMessageRegisterUrl(message, match...)
-		// today
-	} else if match := BotTodayTextPattern.FindStringSubmatch(message.Text); match != nil {
-		telegramBot.handleMessageToday(message)
-		// tomorrow
-	} else if match := BotTomorrowTextPattern.FindStringSubmatch(message.Text); match != nil {
-		telegramBot.handleMessageTomorrow(message)
-		// full week
-	} else if match := BotWeekTextPattern.FindStringSubmatch(message.Text); match != nil {
-		telegramBot.handleMessageWeek(message)
-		// full next week
-	} else if match := BotWeekNextTextPattern.FindStringSubmatch(message.Text); match != nil {
-		telegramBot.handleMessageWeekNext(message)
-		// unknown
-	} else {
-		telegramBot.handleMessageUnknown(message)
+		return
 	}
+	for _, botMessageHandler := range BotMessageHandlers {
+		match := botMessageHandler.RegExp.FindStringSubmatch(message.Text)
+		if match != nil && len(match) == botMessageHandler.RegExpGroups+1 {
+			botMessageHandler.Handler(*telegramBot, message)
+			return
+		}
+	}
+	telegramBot.handleMessageUnknown(message)
 }
 
 func (telegramBot *TelegramBot) handleUpdate(update *telegram_api.Update) {
