@@ -17,20 +17,23 @@ const (
 	BotTextDisclaimer = "Это <b>тестовый</b> бот. Для получения доступа свяжитесь с разработчиком."
 	BotTextStart      = "Для регистрации отправь мне ссылку на твое расписание на timetable.spbu.ru\n\n" +
 		"Например: https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508"
-	BotTextRegistering     = "Определяю расписание..."
-	BotTextRegisterSuccess = "Твое расписание: <b>%s</b>"
-	BotTextMainMenu        = "Главное меню"
+	BotTextRegistering             = "Определяю расписание..."
+	BotTextRegisterSuccess         = "Твое расписание: <b>%s</b>"
+	BotTextMainMenu                = "Главное меню"
+	BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
 )
 
 const (
-	BotCommandStart    = "/start"
-	BotCommandToday    = "/today"
-	BotCommandTomorrow = "/tomorrow"
-	BotCommandWeek     = "/week"
-	BotCommandWeekNext = "/weeknext"
+	BotCommandStart = "/start"
 )
 
-const BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
+const (
+	EmojiInformationSource = "\U00002139"
+	EmojiStar              = "\U00002B50"
+	EmojiGear              = "\U00002699"
+	EmojiStation           = "\U0001F689"
+	EmojiMemo              = "\U0001F4DD"
+)
 
 var (
 	BotTextSearching = [...]string{
@@ -55,6 +58,13 @@ var (
 		"Я хотел что-то ответить, но забыл что.",
 		"Увы, я не чат бот. Давай только по делу.",
 		"Когда-то давно, четыре народа жили в мире. Но все изменилось, когда ты начал спамить непонятными сообщениями.",
+	}
+)
+
+var (
+	BotKeyboardMainMenu = [][]telegram_api.KeyboardButton{
+		{{Text: "Сессия"}, {Text: "Расписание"}},
+		{{Text: EmojiInformationSource}, {Text: EmojiStar}, {Text: EmojiGear}, {Text: EmojiStation}, {Text: EmojiMemo}},
 	}
 )
 
@@ -149,10 +159,7 @@ func (telegramBot *TelegramBot) sendMainMenuTo(chat *telegram_api.Chat) {
 		ChatID: chat.ID,
 		Text:   BotTextMainMenu,
 		ReplyMarkup: &telegram_api.ReplyMarkup{
-			Keyboard: [][]telegram_api.KeyboardButton{
-				{{Text: BotCommandToday}, {Text: BotCommandTomorrow}, {Text: BotCommandWeek}},
-				{{Text: BotCommandStart}, {Text: BotCommandWeekNext}},
-			},
+			Keyboard:       BotKeyboardMainMenu,
 			ResizeKeyboard: true,
 		},
 	}
