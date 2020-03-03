@@ -19,7 +19,6 @@ const (
 		"Например: https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508"
 	BotTextRegistering             = "Определяю расписание..."
 	BotTextRegisterSuccess         = "Твое расписание: <b>%s</b>"
-	BotTextMainMenu                = "Главное меню"
 	BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
 )
 
@@ -33,6 +32,9 @@ const (
 	EmojiGear              = "\U00002699"
 	EmojiStation           = "\U0001F689"
 	EmojiMemo              = "\U0001F4DD"
+	EmojiBack              = "\U0001F519"
+	EmojiBookmark          = "\U0001F516"
+	EmojiAlarmClock        = "\U000023F0"
 )
 
 var (
@@ -61,12 +63,33 @@ var (
 	}
 )
 
-var (
-	BotKeyboardMainMenu = [][]telegram_api.KeyboardButton{
-		{{Text: "Сессия"}, {Text: "Расписание"}},
-		{{Text: EmojiInformationSource}, {Text: EmojiStar}, {Text: EmojiGear}, {Text: EmojiStation}, {Text: EmojiMemo}},
-	}
+type BotKeyboard struct {
+	Text     string
+	Keyboard [][]telegram_api.KeyboardButton
+}
+
+const (
+	KeyboardMainMenu = iota
+	//KeyboardSchedule
 )
+
+var BotKeyboards = [2]BotKeyboard{
+	{
+		Text: "Главное меню",
+		Keyboard: [][]telegram_api.KeyboardButton{
+			{{Text: "Сессия"}, {Text: "Расписание"}},
+			{{Text: EmojiInformationSource}, {Text: EmojiStar}, {Text: EmojiGear}, {Text: EmojiStation},
+				{Text: EmojiMemo}},
+		},
+	},
+	{
+		Text: "Меню расписания",
+		Keyboard: [][]telegram_api.KeyboardButton{
+			{{Text: "Сегодня"}, {Text: "Завтра"}, {Text: "Неделя"}},
+			{{Text: EmojiBack}, {Text: EmojiBookmark}, {Text: EmojiAlarmClock}, {Text: EmojiMemo}},
+		},
+	},
+}
 
 var (
 	BotTodayTextPattern    = regexp.MustCompile(`(?im)^/today|сегодня$`)
@@ -154,12 +177,12 @@ func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message
 	}
 }
 
-func (telegramBot *TelegramBot) sendMainMenuTo(chat *telegram_api.Chat) {
+func (telegramBot *TelegramBot) sendKeyboardTo(chat *telegram_api.Chat, keyboard *BotKeyboard) {
 	botMessage := &telegram_api.BotMessage{
 		ChatID: chat.ID,
-		Text:   BotTextMainMenu,
+		Text:   keyboard.Text,
 		ReplyMarkup: &telegram_api.ReplyMarkup{
-			Keyboard:       BotKeyboardMainMenu,
+			Keyboard:       keyboard.Keyboard,
 			ResizeKeyboard: true,
 		},
 	}
@@ -229,7 +252,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
 		log.Println(err)
 	}
-	telegramBot.sendMainMenuTo(message.Chat)
+	telegramBot.sendKeyboardTo(message.Chat, &BotKeyboards[KeyboardMainMenu])
 }
 
 func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from time.Time, to time.Time) {
