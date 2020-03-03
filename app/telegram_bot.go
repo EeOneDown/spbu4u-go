@@ -30,7 +30,7 @@ const (
 	EmojiMemo              = "\U0001F4DD"
 	EmojiBack              = "\U0001F519"
 	EmojiBookmark          = "\U0001F516"
-	EmojiAlarmClock        = "\U000023F0"
+	EmojiAlarmClock        = "\u23f0"
 )
 
 var (
@@ -378,7 +378,6 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 		telegramBot.handleNotAllowed(message)
 		return
 	}
-	log.Println(message.Text)
 	for _, botMessageHandler := range BotMessageHandlers {
 		match := botMessageHandler.RegExp.FindStringSubmatch(message.Text)
 		if match != nil && len(match) == botMessageHandler.RegExpGroups+1 {
