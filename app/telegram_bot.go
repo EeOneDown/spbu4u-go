@@ -11,6 +11,7 @@ import (
 	"spbu4u-go/telegram_api"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -361,7 +362,7 @@ func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Mess
 }
 
 func (telegramBot *TelegramBot) handleMessageUnknown(message *telegram_api.Message) {
-	log.Println(message.Text)
+	log.Println(utf8.DecodeRuneInString(message.Text))
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
 		Text:      getUnknownMessageText(),
