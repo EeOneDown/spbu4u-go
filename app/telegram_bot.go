@@ -23,9 +23,9 @@ const (
 )
 
 const (
-	EmojiInformationSource = "\U00002139"
+	EmojiInformationSource = "\u2139\ufe0f"
 	EmojiStar              = "\u2b50\ufe0f"
-	EmojiGear              = "\U00002699"
+	EmojiGear              = "\u2699\ufe0f"
 	EmojiStation           = "\U0001F689"
 	EmojiMemo              = "\U0001F4DD"
 	EmojiBack              = "\U0001F519"
@@ -378,6 +378,7 @@ func (telegramBot *TelegramBot) handleMessage(message *telegram_api.Message) {
 		telegramBot.handleNotAllowed(message)
 		return
 	}
+	log.Println(message.Text)
 	for _, botMessageHandler := range BotMessageHandlers {
 		match := botMessageHandler.RegExp.FindStringSubmatch(message.Text)
 		if match != nil && len(match) == botMessageHandler.RegExpGroups+1 {
