@@ -66,7 +66,7 @@ type BotKeyboard struct {
 
 const (
 	KeyboardMainMenu = iota
-	//KeyboardSchedule
+	KeyboardSchedule
 )
 
 var BotKeyboards = [2]BotKeyboard{
@@ -98,6 +98,8 @@ type BotMessageHandler struct {
 var (
 	RegExpStart       = regexp.MustCompile(`(?im)^/start$`)
 	RegExpRegisterUrl = regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`)
+	RegExpMainMenu    = regexp.MustCompile(fmt.Sprintf("(?im)/menu|%s|назад$", EmojiBack))
+	RegExpSchedule    = regexp.MustCompile(`(?im)^/schedule|расписание$`)
 	RegExpToday       = regexp.MustCompile(`(?im)^/today|сегодня$`)
 	RegExpTomorrow    = regexp.MustCompile(`(?im)^/tomorrow|завтра$`)
 	RegExpWeek        = regexp.MustCompile(`(?im)^/week|вся неделя$`)
@@ -113,6 +115,14 @@ var BotMessageHandlers = []BotMessageHandler{
 		RegExp:       RegExpRegisterUrl,
 		RegExpGroups: 2,
 		Handler:      (*TelegramBot).handleMessageRegisterUrl,
+	},
+	{
+		RegExp:  RegExpMainMenu,
+		Handler: (*TelegramBot).handleMessageMainMenu,
+	},
+	{
+		RegExp:  RegExpSchedule,
+		Handler: (*TelegramBot).handleMessageSchedule,
 	},
 	{
 		RegExp:  RegExpToday,
@@ -288,6 +298,14 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 		log.Println(err)
 	}
 	telegramBot.sendKeyboardTo(message.Chat, &BotKeyboards[KeyboardMainMenu])
+}
+
+func (telegramBot *TelegramBot) handleMessageMainMenu(message *telegram_api.Message) {
+	telegramBot.sendKeyboardTo(message.Chat, &BotKeyboards[KeyboardMainMenu])
+}
+
+func (telegramBot *TelegramBot) handleMessageSchedule(message *telegram_api.Message) {
+	telegramBot.sendKeyboardTo(message.Chat, &BotKeyboards[KeyboardSchedule])
 }
 
 func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from time.Time, to time.Time) {
