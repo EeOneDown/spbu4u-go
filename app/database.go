@@ -7,12 +7,7 @@ import (
 	"os"
 )
 
-const (
-	DBQueryGetStorageFor = "JOIN users ON users.schedule_storage_id = schedule_storages.id" +
-		" AND users.telegram_chat_id = ?" +
-		" WHERE users.deleted_at IS NULL"
-	DBQueryUserByTelegramChatID = "telegram_chat_id = ?"
-)
+const DBQueryUserByTelegramChatID = "telegram_chat_id = ?"
 
 func InitDB() *gorm.DB {
 	databaseUrl := os.Getenv("DATABASE_URL")
@@ -25,4 +20,8 @@ func InitDB() *gorm.DB {
 	}
 	db.AutoMigrate(&User{}, &ScheduleStorage{})
 	return db
+}
+
+func AutoPreload(db *gorm.DB) *gorm.DB {
+	return db.Set("gorm:auto_preload", true)
 }

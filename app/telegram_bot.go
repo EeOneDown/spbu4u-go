@@ -353,9 +353,9 @@ func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from tim
 			log.Println(err)
 		}
 	}()
-	var scheduleStorage ScheduleStorage
-	telegramBot.DB.Joins(DBQueryGetStorageFor, chat.ID).Find(&scheduleStorage)
-	schedule, err := scheduleStorage.GetSchedule(from, to)
+	var user User
+	telegramBot.DB.Scopes(AutoPreload).Find(&user, DBQueryUserByTelegramChatID, chat.ID)
+	schedule, err := user.ScheduleStorage.GetSchedule(from, to)
 	if err != nil {
 		log.Println(err)
 		return
