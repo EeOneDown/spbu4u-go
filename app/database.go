@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	DBQueryGetStorageFor        = "JOIN users ON users.schedule_storage_id = schedule_storages.id AND users.telegram_chat_id = ?"
+	DBQueryGetStorageFor = "JOIN users ON users.schedule_storage_id = schedule_storages.id" +
+		" AND users.telegram_chat_id = ?" +
+		" WHERE users.deleted_at IS NULL"
 	DBQueryUserByTelegramChatID = "telegram_chat_id = ?"
 )
 
