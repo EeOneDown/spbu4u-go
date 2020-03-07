@@ -321,6 +321,7 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	}).Assign(User{
 		ScheduleStorageID: scheduleStorage.ID,
 	}).FirstOrCreate(&user)
+	log.Println(user)
 
 	botEditedMessage := telegram_api.BotEditedMessage{
 		ChatID:    message.Chat.ID,
