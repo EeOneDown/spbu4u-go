@@ -321,7 +321,6 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	}).Assign(User{
 		ScheduleStorageID: scheduleStorage.ID,
 	}).FirstOrCreate(&user)
-	log.Println(user)
 
 	botEditedMessage := telegram_api.BotEditedMessage{
 		ChatID:    message.Chat.ID,
@@ -418,7 +417,7 @@ func (telegramBot *TelegramBot) handleMessageSettings(message *telegram_api.Mess
 }
 
 func (telegramBot *TelegramBot) handleMessageExit(message *telegram_api.Message) {
-	defer telegramBot.DB.Delete(User{}, DBQueryUserByTelegramChatID, message.Chat.ID)
+	defer telegramBot.DB.Unscoped().Delete(User{}, DBQueryUserByTelegramChatID, message.Chat.ID)
 	botMessage := &telegram_api.BotMessage{
 		ChatID: message.Chat.ID,
 		Text:   BotTextExit,
