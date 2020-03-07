@@ -293,12 +293,14 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	if scheduleType == ScheduleStorageTypeGroup {
 		res, err := spbu_api.GetGroupScheduleFor(scheduleId, today, today)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 		scheduleStorageName = res.StudentGroupDisplayName
 	} else {
 		res, err := spbu_api.GetEducatorScheduleFor(scheduleId, today, today)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 		scheduleStorageName = res.EducatorLongDisplayText
