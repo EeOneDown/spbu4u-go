@@ -14,12 +14,18 @@ import (
 )
 
 const (
+	BotChanel         = "@Spbu4u_news"
+	BotDeveloper      = "@UBAHBHU3"
 	BotTextDisclaimer = "Это <b>тестовый</b> бот. Для получения доступа свяжитесь с разработчиком."
 	BotTextStart      = "Для регистрации отправь мне ссылку на твое расписание на timetable.spbu.ru\n\n" +
 		"Например: https://timetable.spbu.ru/HIST/StudentGroupEvents/Primary/248508"
 	BotTextRegistering             = "Определяю расписание..."
 	BotTextRegisterSuccess         = "Твое расписание: <b>%s</b>"
 	BotTextSundayScheduleSearching = "Пары в воскресенье?? Ну я гляну, конечно..."
+	BotTextExit                    = "До скорой встречи!"
+	BotTextSupport                 = "Если возникла проблема, то:\n" +
+		"1. Загляни в наш канал " + BotChanel + "\n" +
+		"2. Свяжись с разработчиком " + BotDeveloper
 )
 
 const (
@@ -67,9 +73,10 @@ type BotKeyboard struct {
 const (
 	KeyboardMainMenu = iota
 	KeyboardSchedule
+	KeyboardSettings
 )
 
-var BotKeyboards = [2]BotKeyboard{
+var BotKeyboards = [3]BotKeyboard{
 	{
 		Text: "Главное меню",
 		Keyboard: [][]telegram_api.KeyboardButton{
@@ -85,6 +92,13 @@ var BotKeyboards = [2]BotKeyboard{
 			{{Text: EmojiBack}, {Text: EmojiBookmark}, {Text: EmojiAlarmClock}, {Text: EmojiMemo}},
 		},
 	},
+	{
+		Text: "Меню настроек",
+		Keyboard: [][]telegram_api.KeyboardButton{
+			{{Text: "Релогин"}, {Text: "Завершить"}},
+			{{Text: "Назад"}, {Text: "Поддержка"}},
+		},
+	},
 }
 
 var RegExpAllowedTgID = regexp.MustCompile(os.Getenv("ALLOWED_TG_ID"))
@@ -96,7 +110,7 @@ type BotMessageHandler struct {
 }
 
 var (
-	RegExpStart       = regexp.MustCompile(`(?im)^/start$`)
+	RegExpStart       = regexp.MustCompile(`(?im)^/start|релогин$`)
 	RegExpRegisterUrl = regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`)
 	RegExpMainMenu    = regexp.MustCompile(fmt.Sprintf("(?im)/menu|%s|назад$", EmojiBack))
 	RegExpSchedule    = regexp.MustCompile(`(?im)^/schedule|расписание$`)
@@ -104,9 +118,13 @@ var (
 	RegExpTomorrow    = regexp.MustCompile(`(?im)^/tomorrow|завтра$`)
 	RegExpWeek        = regexp.MustCompile(`(?im)^/week|вся неделя$`)
 	RegExpWeekNext    = regexp.MustCompile(`(?im)^/weeknext|вся неделя след(?:ующая)?$`)
+	RegExpSettings    = regexp.MustCompile(fmt.Sprintf("(?im)/settings|%s|настройки$", EmojiGear))
+	RegExpExit        = regexp.MustCompile(`(?im)^/exit|завершить$`)
+	RegExpSupport     = regexp.MustCompile(`(?im)^/support|поддержка$`)
 )
 
 var BotMessageHandlers = []BotMessageHandler{
+	// start
 	{
 		RegExp:  RegExpStart,
 		Handler: (*TelegramBot).handleMessageStart,
@@ -120,6 +138,7 @@ var BotMessageHandlers = []BotMessageHandler{
 		RegExp:  RegExpMainMenu,
 		Handler: (*TelegramBot).handleMessageMainMenu,
 	},
+	//schedule
 	{
 		RegExp:  RegExpSchedule,
 		Handler: (*TelegramBot).handleMessageSchedule,
@@ -139,6 +158,19 @@ var BotMessageHandlers = []BotMessageHandler{
 	{
 		RegExp:  RegExpWeekNext,
 		Handler: (*TelegramBot).handleMessageWeekNext,
+	},
+	// settings
+	{
+		RegExp:  RegExpSettings,
+		Handler: (*TelegramBot).handleMessageSettings,
+	},
+	{
+		RegExp:  RegExpExit,
+		Handler: (*TelegramBot).handleMessageExit,
+	},
+	{
+		RegExp:  RegExpSupport,
+		Handler: (*TelegramBot).handleMessageSupport,
 	},
 }
 
@@ -376,6 +408,34 @@ func (telegramBot *TelegramBot) handleMessageWeekNext(message *telegram_api.Mess
 	monday := today.AddDate(0, 0, 8-int(today.Weekday()))
 	sunday := monday.AddDate(0, 0, 6)
 	telegramBot.sendScheduleTo(message.Chat, monday, sunday)
+}
+
+func (telegramBot *TelegramBot) handleMessageSettings(message *telegram_api.Message) {
+	telegramBot.sendKeyboardTo(message.Chat, &BotKeyboards[KeyboardSettings])
+}
+
+func (telegramBot *TelegramBot) handleMessageExit(message *telegram_api.Message) {
+	defer telegramBot.DB.Delete(User{}, DBQueryUserByTelegramChatID, message.Chat.ID)
+	botMessage := &telegram_api.BotMessage{
+		ChatID: message.Chat.ID,
+		Text:   BotTextExit,
+		ReplyMarkup: &telegram_api.ReplyMarkup{
+			RemoveKeyboard: true,
+		},
+	}
+	if _, err := telegramBot.Bot.SendMessage(botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
+func (telegramBot *TelegramBot) handleMessageSupport(message *telegram_api.Message) {
+	botMessage := &telegram_api.BotMessage{
+		ChatID: message.Chat.ID,
+		Text:   BotTextSupport,
+	}
+	if _, err := telegramBot.Bot.SendMessage(botMessage); err != nil {
+		log.Println(err)
+	}
 }
 
 func (telegramBot *TelegramBot) handleMessageUnknown(message *telegram_api.Message) {

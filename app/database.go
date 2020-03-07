@@ -7,7 +7,10 @@ import (
 	"os"
 )
 
-const DBQueryGetStorageFor = "JOIN users ON users.schedule_storage_id = schedule_storages.id AND users.telegram_chat_id = ?"
+const (
+	DBQueryGetStorageFor        = "JOIN users ON users.schedule_storage_id = schedule_storages.id AND users.telegram_chat_id = ?"
+	DBQueryUserByTelegramChatID = "telegram_chat_id = ?"
+)
 
 func InitDB() *gorm.DB {
 	databaseUrl := os.Getenv("DATABASE_URL")
