@@ -112,6 +112,7 @@ type BotMessageHandler struct {
 var (
 	RegExpStart       = regexp.MustCompile(`(?im)^/start|релогин$`)
 	RegExpRegisterUrl = regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`)
+	RegExpWhoAmI      = regexp.MustCompile(`(?im)^/me|/whoami|я|кто я|группа$`)
 	RegExpMainMenu    = regexp.MustCompile(fmt.Sprintf("(?im)/menu|%s|назад$", EmojiBack))
 	RegExpSchedule    = regexp.MustCompile(`(?im)^/schedule|расписание$`)
 	RegExpToday       = regexp.MustCompile(`(?im)^/today|сегодня$`)
@@ -133,6 +134,10 @@ var BotMessageHandlers = []BotMessageHandler{
 		RegExp:       RegExpRegisterUrl,
 		RegExpGroups: 2,
 		Handler:      (*TelegramBot).handleMessageRegisterUrl,
+	},
+	{
+		RegExp:  RegExpWhoAmI,
+		Handler: (*TelegramBot).handleMessageWhoAmI,
 	},
 	{
 		RegExp:  RegExpMainMenu,
@@ -324,6 +329,19 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 		log.Println(err)
 	}
 	telegramBot.sendKeyboardTo(message.Chat, &BotKeyboards[KeyboardMainMenu])
+}
+
+func (telegramBot *TelegramBot) handleMessageWhoAmI(message *telegram_api.Message) {
+	var user User
+	telegramBot.DB.Where(DBQueryUserByTelegramChatID, message.Chat.ID).Preload("ScheduleStorage").Find(&user)
+
+	botMessage := &telegram_api.BotMessage{
+		ChatID: message.Chat.ID,
+		Text:   fmt.Sprintf(BotTextRegisterSuccess, user.ScheduleStorage.Name),
+	}
+	if _, err := telegramBot.Bot.SendMessage(botMessage); err != nil {
+		log.Println(err)
+	}
 }
 
 func (telegramBot *TelegramBot) handleMessageMainMenu(message *telegram_api.Message) {
