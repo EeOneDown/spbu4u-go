@@ -20,7 +20,7 @@ func TestFindScheduleFromGroupUrl(t *testing.T) {
 	const goodScheduleId = 247986
 	const goodScheduleType = ScheduleStorageTypeGroup
 	for _, goodUrl := range goodUrls {
-		match := RegExpScheduleLink.FindStringSubmatch(goodUrl)
+		match := RegExpRegisterUrl.FindStringSubmatch(goodUrl)
 		if match == nil || len(match) != 3 {
 			t.Fail()
 			continue
@@ -53,7 +53,7 @@ func TestFindScheduleFromEducatorUrl(t *testing.T) {
 	const goodScheduleId = 1420
 	const goodScheduleType = ScheduleStorageTypeEducator
 	for _, goodUrl := range goodUrls {
-		match := RegExpScheduleLink.FindStringSubmatch(goodUrl)
+		match := RegExpRegisterUrl.FindStringSubmatch(goodUrl)
 		if match == nil || len(match) != 3 {
 			t.Fail()
 			continue
@@ -86,7 +86,7 @@ func TestFindScheduleFromWeekEducatorUrl(t *testing.T) {
 	const goodScheduleId = 1420
 	const goodScheduleType = ScheduleStorageTypeEducator
 	for _, goodUrl := range goodUrls {
-		match := RegExpScheduleLink.FindStringSubmatch(goodUrl)
+		match := RegExpRegisterUrl.FindStringSubmatch(goodUrl)
 		if match == nil || len(match) != 3 {
 			t.Fail()
 			continue
