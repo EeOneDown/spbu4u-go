@@ -203,21 +203,13 @@ func InitTelegramBot(db *gorm.DB) *TelegramBot {
 	if telegramBotToken == "" {
 		log.Fatal("$TELEGRAM_BOT_TOKEN must be set")
 	}
-	domain := os.Getenv("DOMAIN")
-	if domain == "" {
-		log.Fatal("$DOMAIN must be set")
-	}
 	bot := &telegram_api.Bot{Token: telegramBotToken}
 	telegramBot := TelegramBot{db, bot}
-	if os.Getenv("SKIP_TELEGRAM_WEB_HOOK_SET") == "" {
-		telegramBot.setWebHook(domain)
-	}
-
 	return &telegramBot
 }
 
-func (telegramBot *TelegramBot) setWebHook(domain string) {
-	url := fmt.Sprintf("https://%s:443/tg/updates", domain)
+func (telegramBot *TelegramBot) setWebHook(domain string, path string) {
+	url := fmt.Sprintf("https://%s:443%s", domain, path)
 	log.Println(url)
 	webHookConfig := telegram_api.WebHookConfig{
 		Url:            url,

@@ -17,21 +17,33 @@ type Server struct {
 }
 
 func InitServerAndListen(db *gorm.DB, telegramBot *TelegramBot) error {
+	// load required ENVs
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
-	server := Server{
-		DB:          db,
-		TelegramBot: telegramBot,
+	domain := os.Getenv("DOMAIN")
+	if domain == "" {
+		log.Fatal("$DOMAIN must be set")
 	}
 	tgSecretPath := os.Getenv("TG_SECRET_PATH")
 	if tgSecretPath == "" {
 		log.Fatal("$TG_SECRET_PATH must be set")
 	}
+
+	// init server
+	server := Server{
+		DB:          db,
+		TelegramBot: telegramBot,
+	}
+
+	// setup TG bot
+	telegramBot.setWebHook(domain, tgSecretPath)
+
+	// register endpoints
 	http.HandleFunc(tgSecretPath, server.telegramUpdateWebHook)
-	// http.HandleFunc("/getTelegramWebHookInfo", server.getTelegramWebHookInfo)
-	// http.HandleFunc("/setTelegramWebHook", server.setTelegramWebHook)
+	http.HandleFunc(tgSecretPath+"/getWebHookInfo", server.getTelegramWebHookInfo)
+	http.HandleFunc(tgSecretPath+"/setWebHook", server.setTelegramWebHook)
 	return http.ListenAndServe(":"+port, nil)
 }
 
@@ -55,7 +67,7 @@ func (server *Server) getTelegramWebHookInfo(w http.ResponseWriter, r *http.Requ
 func (server *Server) setTelegramWebHook(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		server.TelegramBot.setWebHook(os.Getenv("DOMAIN"))
+		server.TelegramBot.setWebHook(os.Getenv("DOMAIN"), os.Getenv("TG_SECRET_PATH"))
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
