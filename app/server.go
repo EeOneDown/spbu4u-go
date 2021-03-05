@@ -25,7 +25,11 @@ func InitServerAndListen(db *gorm.DB, telegramBot *TelegramBot) error {
 		DB:          db,
 		TelegramBot: telegramBot,
 	}
-	http.HandleFunc("/tg/updates", server.telegramUpdateWebHook)
+	tgSecretPath := os.Getenv("TG_SECRET_PATH")
+	if tgSecretPath == "" {
+		log.Fatal("$TG_SECRET_PATH must be set")
+	}
+	http.HandleFunc(tgSecretPath, server.telegramUpdateWebHook)
 	// http.HandleFunc("/getTelegramWebHookInfo", server.getTelegramWebHookInfo)
 	// http.HandleFunc("/setTelegramWebHook", server.setTelegramWebHook)
 	return http.ListenAndServe(":"+port, nil)
