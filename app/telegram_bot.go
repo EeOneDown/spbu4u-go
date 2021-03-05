@@ -110,18 +110,18 @@ type BotMessageHandler struct {
 }
 
 var (
-	RegExpStart       = regexp.MustCompile(`(?im)^/start|релогин$`)
+	RegExpStart       = regexp.MustCompile(`(?im)^(/start|релогин)$`)
 	RegExpRegisterUrl = regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`)
-	RegExpWhoAmI      = regexp.MustCompile(`(?im)^/me|/whoami|я|кто я|группа$`)
-	RegExpMainMenu    = regexp.MustCompile(fmt.Sprintf("(?im)/menu|%s|назад$", EmojiBack))
-	RegExpSchedule    = regexp.MustCompile(`(?im)^/schedule|расписание$`)
-	RegExpToday       = regexp.MustCompile(`(?im)^/today|сегодня$`)
-	RegExpTomorrow    = regexp.MustCompile(`(?im)^/tomorrow|завтра$`)
-	RegExpWeek        = regexp.MustCompile(`(?im)^/week|вся неделя$`)
-	RegExpWeekNext    = regexp.MustCompile(`(?im)^/weeknext|вся неделя след(?:ующая)?$`)
-	RegExpSettings    = regexp.MustCompile(fmt.Sprintf("(?im)/settings|%s|настройки$", EmojiGear))
-	RegExpExit        = regexp.MustCompile(`(?im)^/exit|завершить$`)
-	RegExpSupport     = regexp.MustCompile(`(?im)^/support|поддержка$`)
+	RegExpWhoAmI      = regexp.MustCompile(`(?im)^(/me|/whoami|я|кто я|группа)$`)
+	RegExpMainMenu    = regexp.MustCompile(fmt.Sprintf("(?im)^(/menu|%s|назад)$", EmojiBack))
+	RegExpSchedule    = regexp.MustCompile(`(?im)^(/schedule|расписание)$`)
+	RegExpToday       = regexp.MustCompile(`(?im)^(/today|сегодня)$`)
+	RegExpTomorrow    = regexp.MustCompile(`(?im)^(/tomorrow|завтра)$`)
+	RegExpWeek        = regexp.MustCompile(`(?im)^(/week|вся неделя)$`)
+	RegExpWeekNext    = regexp.MustCompile(`(?im)^(/weeknext|вся неделя след(?:ующая)?)$`)
+	RegExpSettings    = regexp.MustCompile(fmt.Sprintf("(?im)^(/settings|%s|настройки)$", EmojiGear))
+	RegExpExit        = regexp.MustCompile(`(?im)^(/exit|завершить)$`)
+	RegExpSupport     = regexp.MustCompile(`(?im)^(/support|поддержка)$`)
 )
 
 var BotMessageHandlers = []BotMessageHandler{
@@ -336,8 +336,9 @@ func (telegramBot *TelegramBot) handleMessageWhoAmI(message *telegram_api.Messag
 	telegramBot.DB.Where(DBQueryUserByTelegramChatID, message.Chat.ID).Preload("ScheduleStorage").Find(&user)
 
 	botMessage := &telegram_api.BotMessage{
-		ChatID: message.Chat.ID,
-		Text:   fmt.Sprintf(BotTextRegisterSuccess, user.ScheduleStorage.Name),
+		ChatID:    message.Chat.ID,
+		Text:      fmt.Sprintf(BotTextRegisterSuccess, user.ScheduleStorage.Name),
+		ParseMode: telegram_api.ParseModeHTML,
 	}
 	if _, err := telegramBot.Bot.SendMessage(botMessage); err != nil {
 		log.Println(err)
