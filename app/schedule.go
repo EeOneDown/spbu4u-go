@@ -9,6 +9,11 @@ import (
 )
 
 const (
+	RemoteLocation      = "Дистанционная работа с преподавателем,С использованием информационно-коммуникационных технологий"
+	RemoteLocationShort = "Дистанционка"
+)
+
+const (
 	EmojiCalendar = "\U0001F4C5"
 	EmojiClock3   = "\U0001F552"
 	EmojiSleeping = "\U0001F634"
@@ -93,10 +98,14 @@ func parseGroupLocations(event *spbu_api.Event, locationsChan chan<- string) {
 				parsedEducators += "; "
 			}
 		}
+		locationName := location.DisplayName
+		if locationName == RemoteLocation {
+			locationName = RemoteLocationShort
+		}
 		if parsedEducators != "" {
-			parsedLocations += fmt.Sprintf("%s <i>(%s)</i>\n", location.DisplayName, parsedEducators)
+			parsedLocations += fmt.Sprintf("%s <i>(%s)</i>\n", locationName, parsedEducators)
 		} else {
-			parsedLocations += fmt.Sprintf("%s\n", location.DisplayName)
+			parsedLocations += fmt.Sprintf("%s\n", locationName)
 		}
 	}
 	locationsChan <- parsedLocations
@@ -137,10 +146,14 @@ func (groupEvents *GroupEvents) Parse(parsedChan chan<- string) {
 }
 
 func parseEducatorLocations(event *spbu_api.Event, locationsChan chan<- string) {
+	eventLocation := event.LocationsDisplayText
+	if eventLocation == RemoteLocation {
+		eventLocation = RemoteLocationShort
+	}
 	if event.ContingentUnitName != "" {
-		locationsChan <- fmt.Sprintf("%s <i>(%s)</i>\n", event.LocationsDisplayText, event.ContingentUnitName)
+		locationsChan <- fmt.Sprintf("%s <i>(%s)</i>\n", eventLocation, event.ContingentUnitName)
 	} else {
-		locationsChan <- fmt.Sprintf("%s\n", event.LocationsDisplayText)
+		locationsChan <- fmt.Sprintf("%s\n", eventLocation)
 	}
 	close(locationsChan)
 }
