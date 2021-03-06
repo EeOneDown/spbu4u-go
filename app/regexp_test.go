@@ -335,3 +335,26 @@ func TestRegExpSupportBad(t *testing.T) {
 		}
 	}
 }
+
+func TestRegExpTrains(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/trains", EmojiStation, "элекрички", "элекрон"} {
+		if !isEq(
+			RegExpTrains.FindStringSubmatch(message),
+			[]string{message},
+		) {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpTrainsBad(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/trans", EmojiStar, "лекрички", "протон"} {
+		if RegExpTrains.FindStringSubmatch(message) != nil {
+			t.Fail()
+			continue
+		}
+	}
+}

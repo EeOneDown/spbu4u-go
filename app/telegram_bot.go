@@ -74,9 +74,10 @@ const (
 	KeyboardMainMenu = iota
 	KeyboardSchedule
 	KeyboardSettings
+	KeyboardTrains
 )
 
-var BotKeyboards = [3]BotKeyboard{
+var BotKeyboards = [4]BotKeyboard{
 	{
 		Text: "Главное меню",
 		Keyboard: [][]telegram_api.KeyboardButton{
@@ -97,6 +98,14 @@ var BotKeyboards = [3]BotKeyboard{
 		Keyboard: [][]telegram_api.KeyboardButton{
 			{{Text: "Релогин"}, {Text: "Завершить"}},
 			{{Text: "Назад"}, {Text: "Поддержка"}},
+		},
+	},
+	{
+		Text: "Меню расписания электричек\n\nДанные предоставлены сервисом " +
+			"<a href = 'http://rasp.yandex.ru/'>Яндекс.Расписания</a>",
+		Keyboard: [][]telegram_api.KeyboardButton{
+			{{Text: "Домой"}, {Text: "В Универ"}, {Text: "Маршрут"}},
+			{{Text: "Назад"}, {Text: "Персонализация"}},
 		},
 	},
 }
@@ -122,6 +131,7 @@ var (
 	RegExpSettings    = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/settings|%s|настройки)$", EmojiGear))
 	RegExpExit        = regexp.MustCompile(`(?im)^(?:/exit|завершить|выход)$`)
 	RegExpSupport     = regexp.MustCompile(`(?im)^(?:/support|поддержка)$`)
+	RegExpTrains      = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/trains|%s|элекр(?:ички|он))$", EmojiStation))
 )
 
 var BotMessageHandlers = []BotMessageHandler{
@@ -176,6 +186,11 @@ var BotMessageHandlers = []BotMessageHandler{
 	{
 		RegExp:  RegExpSupport,
 		Handler: (*TelegramBot).handleMessageSupport,
+	},
+	// trains
+	{
+		RegExp:  RegExpTrains,
+		Handler: (*TelegramBot).handleMessageTrains,
 	},
 }
 
@@ -252,8 +267,9 @@ func (telegramBot *TelegramBot) handleMessageStart(message *telegram_api.Message
 
 func (telegramBot *TelegramBot) sendKeyboardTo(chat *telegram_api.Chat, keyboard *BotKeyboard) {
 	botMessage := &telegram_api.BotMessage{
-		ChatID: chat.ID,
-		Text:   keyboard.Text,
+		ChatID:    chat.ID,
+		Text:      keyboard.Text,
+		ParseMode: telegram_api.ParseModeHTML,
 		ReplyMarkup: &telegram_api.ReplyMarkup{
 			Keyboard:       keyboard.Keyboard,
 			ResizeKeyboard: true,
@@ -457,6 +473,58 @@ func (telegramBot *TelegramBot) handleMessageSupport(message *telegram_api.Messa
 		Text:   BotTextSupport,
 	}
 	if _, err := telegramBot.Bot.SendMessage(botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
+func (telegramBot *TelegramBot) handleMessageTrains(message *telegram_api.Message) {
+	telegramBot.sendKeyboardTo(message.Chat, &BotKeyboards[KeyboardTrains])
+}
+
+func (telegramBot *TelegramBot) handleMessageToHome(message *telegram_api.Message) {
+	log.Println(message.Text)
+	botMessage := telegram_api.BotMessage{
+		ChatID:    message.Chat.ID,
+		Text:      "Едем домой",
+		ParseMode: telegram_api.ParseModeHTML,
+	}
+	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
+func (telegramBot *TelegramBot) handleMessageToUniversity(message *telegram_api.Message) {
+	log.Println(message.Text)
+	botMessage := telegram_api.BotMessage{
+		ChatID:    message.Chat.ID,
+		Text:      "Едем в Универ",
+		ParseMode: telegram_api.ParseModeHTML,
+	}
+	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
+func (telegramBot *TelegramBot) handleMessageCustomTrail(message *telegram_api.Message) {
+	log.Println(message.Text)
+	botMessage := telegram_api.BotMessage{
+		ChatID:    message.Chat.ID,
+		Text:      "Тут выбираем откуда, куда и когда едем",
+		ParseMode: telegram_api.ParseModeHTML,
+	}
+	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
+		log.Println(err)
+	}
+}
+
+func (telegramBot *TelegramBot) handleMessageCustomizeTrails(message *telegram_api.Message) {
+	log.Println(message.Text)
+	botMessage := telegram_api.BotMessage{
+		ChatID:    message.Chat.ID,
+		Text:      "Тут настраиваем где дом/Универ",
+		ParseMode: telegram_api.ParseModeHTML,
+	}
+	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
 		log.Println(err)
 	}
 }
