@@ -25,29 +25,29 @@ type ScheduleStorage struct {
 	Users       []User
 }
 
-func (scheduleStorage *ScheduleStorage) GetSchedule(from time.Time, to time.Time) (Schedule, error) {
+func (scheduleStorage *ScheduleStorage) GetSchedule(from time.Time, to time.Time) Schedule {
 	switch scheduleStorage.Type {
 	case ScheduleStorageTypeGroup:
 		groupEvents, err := spbu_api.GetGroupScheduleFor(scheduleStorage.TimeTableId, from, to)
 		if err != nil {
 			var scheduleNotAllowed *ScheduleNotAvailable
 			var schedule Schedule = scheduleNotAllowed
-			return schedule, err
+			return schedule
 		}
 		var schedule Schedule = (*GroupEvents)(groupEvents)
-		return schedule, nil
+		return schedule
 	case ScheduleStorageTypeEducator:
 		educatorEvents, err := spbu_api.GetEducatorScheduleFor(scheduleStorage.TimeTableId, from, to)
 		if err != nil {
 			var scheduleNotAllowed *ScheduleNotAvailable
 			var schedule Schedule = scheduleNotAllowed
-			return schedule, err
+			return schedule
 		}
 		var schedule Schedule = (*EducatorEvents)(educatorEvents)
-		return schedule, nil
+		return schedule
 	default:
 		var notRegistered *ScheduleNotAllowed
 		var schedule Schedule = notRegistered
-		return schedule, nil
+		return schedule
 	}
 }

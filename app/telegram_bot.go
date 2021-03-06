@@ -290,14 +290,28 @@ func (telegramBot *TelegramBot) handleMessageRegisterUrl(message *telegram_api.M
 	if scheduleType == ScheduleStorageTypeGroup {
 		res, err := spbu_api.GetGroupScheduleFor(scheduleId, today, today)
 		if err != nil {
-			log.Println(err)
+			botEditedMessage := telegram_api.BotEditedMessage{
+				ChatID:    message.Chat.ID,
+				MessageID: (<-botMessageChan).MessageID,
+				Text:      BotTextScheduleServerIsNotAvailable,
+			}
+			if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
+				log.Println(err)
+			}
 			return
 		}
 		scheduleStorageName = res.StudentGroupDisplayName
 	} else {
 		res, err := spbu_api.GetEducatorScheduleFor(scheduleId, today, today)
 		if err != nil {
-			log.Println(err)
+			botEditedMessage := telegram_api.BotEditedMessage{
+				ChatID:    message.Chat.ID,
+				MessageID: (<-botMessageChan).MessageID,
+				Text:      BotTextScheduleServerIsNotAvailable,
+			}
+			if _, err := telegramBot.Bot.EditMessage(&botEditedMessage); err != nil {
+				log.Println(err)
+			}
 			return
 		}
 		scheduleStorageName = res.EducatorLongDisplayText
@@ -366,11 +380,7 @@ func (telegramBot *TelegramBot) sendScheduleTo(chat *telegram_api.Chat, from tim
 	}()
 	var user User
 	telegramBot.DB.Where(DBQueryUserByTelegramChatID, chat.ID).Preload("ScheduleStorage").Find(&user)
-	schedule, err := user.ScheduleStorage.GetSchedule(from, to)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	schedule := user.ScheduleStorage.GetSchedule(from, to)
 	parsedChan := make(chan string)
 	go schedule.Parse(parsedChan)
 

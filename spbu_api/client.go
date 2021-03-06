@@ -1,5 +1,10 @@
 package spbu_api
 
+import (
+	"net/http"
+	"time"
+)
+
 const (
 	BaseUrl = "https://timetable.spbu.ru/api/v1"
 	// Educators
@@ -11,3 +16,7 @@ const (
 	//GroupCustomWeekUrl = BaseUrl + "/groups/%d/events/%d-%v-%d"
 	GroupCustomUrl = BaseUrl + "/groups/%d/events/%d-%v-%d/%d-%v-%d"
 )
+
+var netClient = &http.Client{
+	Timeout: time.Second * 10,
+}

@@ -38,7 +38,7 @@ func GetGroupScheduleFor(id int64, from time.Time, to time.Time) (*GroupEvents, 
 	fromYear, fromMonth, fromDay := from.Date()
 	toYear, toMonth, toDay := to.Date()
 	url := fmt.Sprintf(GroupCustomUrl, id, fromYear, fromMonth, fromDay, toYear, toMonth, toDay)
-	resp, err := http.Get(url)
+	resp, err := netClient.Get(url)
 	if err != nil {
 		return &groupEvents, err
 	}

@@ -38,7 +38,7 @@ func GetEducatorScheduleFor(id int64, from time.Time, to time.Time) (*EducatorEv
 	fromYear, fromMonth, fromDay := from.Date()
 	toYear, toMonth, toDay := to.Date()
 	url := fmt.Sprintf(EducatorCustomUrl, id, fromYear, fromMonth, fromDay, toYear, toMonth, toDay)
-	resp, err := http.Get(url)
+	resp, err := netClient.Get(url)
 	if err != nil {
 		return &educatorEvents, err
 	}
