@@ -119,19 +119,23 @@ type BotMessageHandler struct {
 }
 
 var (
-	RegExpStart       = regexp.MustCompile(`(?im)^(?:/start|релогин)$`)
-	RegExpRegisterUrl = regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`)
-	RegExpWhoAmI      = regexp.MustCompile(`(?im)^(?:/me|/whoami|я|кто я|группа)$`)
-	RegExpMainMenu    = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/menu|%s|назад)$", EmojiBack))
-	RegExpSchedule    = regexp.MustCompile(`(?im)^(?:/schedule|расписание)$`)
-	RegExpToday       = regexp.MustCompile(`(?im)^(?:/today|сегодня)$`)
-	RegExpTomorrow    = regexp.MustCompile(`(?im)^(?:/tomorrow|завтра)$`)
-	RegExpWeek        = regexp.MustCompile(`(?im)^(?:/week|вся неделя)$`)
-	RegExpWeekNext    = regexp.MustCompile(`(?im)^(?:/weeknext|вся неделя след(?:ующая)?)$`)
-	RegExpSettings    = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/settings|%s|настройки)$", EmojiGear))
-	RegExpExit        = regexp.MustCompile(`(?im)^(?:/exit|завершить|выход)$`)
-	RegExpSupport     = regexp.MustCompile(`(?im)^(?:/support|поддержка)$`)
-	RegExpTrains      = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/trains|%s|элекр(?:ички|он))$", EmojiStation))
+	RegExpStart           = regexp.MustCompile(`(?im)^(?:/start|релогин)$`)
+	RegExpRegisterUrl     = regexp.MustCompile(`^(?:https?://)?timetable\.spbu\.ru/(?:[[:alpha:]]+/)?(StudentGroupEvents|(?:Week)?EducatorEvents)(?:/[[:alpha:]]+(?:[?&=a-zA-Z]+studentGroupId)?)?[/=]([[:digit:]]+)(?:/.*)?$`)
+	RegExpWhoAmI          = regexp.MustCompile(`(?im)^(?:/me|/whoami|я|кто я|группа)$`)
+	RegExpMainMenu        = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/menu|%s|назад)$", EmojiBack))
+	RegExpSchedule        = regexp.MustCompile(`(?im)^(?:/schedule|расписание)$`)
+	RegExpToday           = regexp.MustCompile(`(?im)^(?:/today|сегодня)$`)
+	RegExpTomorrow        = regexp.MustCompile(`(?im)^(?:/tomorrow|завтра)$`)
+	RegExpWeek            = regexp.MustCompile(`(?im)^(?:/week|вся неделя)$`)
+	RegExpWeekNext        = regexp.MustCompile(`(?im)^(?:/weeknext|вся неделя след(?:ующая)?)$`)
+	RegExpSettings        = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/settings|%s|настройки)$", EmojiGear))
+	RegExpExit            = regexp.MustCompile(`(?im)^(?:/exit|завершить|выход)$`)
+	RegExpSupport         = regexp.MustCompile(`(?im)^(?:/support|поддержка)$`)
+	RegExpTrains          = regexp.MustCompile(fmt.Sprintf("(?im)^(?:/trains|%s|элекр(?:ички|он))$", EmojiStation))
+	RegExpToHome          = regexp.MustCompile(`(?im)^(?:/gohome|домой)$`)
+	RegExpToUniversity    = regexp.MustCompile(`(?im)^(?:/gouniver|в универ)$`)
+	RegExpCustomTrail     = regexp.MustCompile(`(?im)^(?:/gocustom|маршрут)$`)
+	RegExpCustomizeTrails = regexp.MustCompile(`(?im)^(?:/edittrails|персонализация)$`)
 )
 
 var BotMessageHandlers = []BotMessageHandler{
@@ -191,6 +195,22 @@ var BotMessageHandlers = []BotMessageHandler{
 	{
 		RegExp:  RegExpTrains,
 		Handler: (*TelegramBot).handleMessageTrains,
+	},
+	{
+		RegExp:  RegExpToHome,
+		Handler: (*TelegramBot).handleMessageToHome,
+	},
+	{
+		RegExp:  RegExpToUniversity,
+		Handler: (*TelegramBot).handleMessageToUniversity,
+	},
+	{
+		RegExp:  RegExpCustomTrail,
+		Handler: (*TelegramBot).handleMessageCustomTrail,
+	},
+	{
+		RegExp:  RegExpCustomizeTrails,
+		Handler: (*TelegramBot).handleMessageCustomizeTrails,
 	},
 }
 

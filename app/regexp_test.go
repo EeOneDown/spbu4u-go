@@ -358,3 +358,95 @@ func TestRegExpTrainsBad(t *testing.T) {
 		}
 	}
 }
+
+func TestRegExpToHome(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/gohome", "домой"} {
+		if !isEq(
+			RegExpToHome.FindStringSubmatch(message),
+			[]string{message},
+		) {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpToHomeBad(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/gohomie", "дом ой", "протон"} {
+		if RegExpToHome.FindStringSubmatch(message) != nil {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpToUniversity(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/gouniver", "в универ"} {
+		if !isEq(
+			RegExpToUniversity.FindStringSubmatch(message),
+			[]string{message},
+		) {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpToUniversityBad(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/gouniversity", "из универа"} {
+		if RegExpToUniversity.FindStringSubmatch(message) != nil {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpCustomTrail(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/gocustom", "маршрут"} {
+		if !isEq(
+			RegExpCustomTrail.FindStringSubmatch(message),
+			[]string{message},
+		) {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpCustomTrailBad(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/gocustomize", "маршрутка"} {
+		if RegExpCustomTrail.FindStringSubmatch(message) != nil {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpCustomizeTrails(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/edittrails", "персонализация"} {
+		if !isEq(
+			RegExpCustomizeTrails.FindStringSubmatch(message),
+			[]string{message},
+		) {
+			t.Fail()
+			continue
+		}
+	}
+}
+
+func TestRegExpCustomizeTrailsBad(t *testing.T) {
+	t.Parallel()
+	for _, message := range []string{"/edit", "персонал"} {
+		if RegExpCustomizeTrails.FindStringSubmatch(message) != nil {
+			t.Fail()
+			continue
+		}
+	}
+}
