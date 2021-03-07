@@ -98,7 +98,7 @@ func parseGroupLocations(event *spbu_api.Event, locationsChan chan<- string) {
 				parsedEducators += "; "
 			}
 		}
-		locationName := location.DisplayName
+		locationName := strings.TrimSpace(location.DisplayName)
 		if locationName == RemoteLocation {
 			locationName = RemoteLocationShort
 		}
@@ -146,7 +146,7 @@ func (groupEvents *GroupEvents) Parse(parsedChan chan<- string) {
 }
 
 func parseEducatorLocations(event *spbu_api.Event, locationsChan chan<- string) {
-	eventLocation := event.LocationsDisplayText
+	eventLocation := strings.TrimSpace(event.LocationsDisplayText)
 	if eventLocation == RemoteLocation {
 		eventLocation = RemoteLocationShort
 	}
