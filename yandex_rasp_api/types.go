@@ -24,7 +24,7 @@ type Segment struct {
 	To                Station    `json:"to"`
 	HasTransfers      bool       `json:"has_transfers"`
 	TicketsInfo       TicketInfo `json:"tickets_info"`
-	Duration          int        `json:"duration"`
+	Duration          float32    `json:"duration"`
 	ArrivalTerminal   string     `json:"arrival_terminal"`
 	StartDate         string     `json:"start_date"`
 	ArrivalPlatform   string     `json:"arrival_platform"`
