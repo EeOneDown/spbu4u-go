@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"spbu4u-go/spbu_api"
 	"spbu4u-go/telegram_api"
+	"spbu4u-go/yandex_rasp_api"
 	"strconv"
 	"time"
 )
@@ -37,6 +38,13 @@ const (
 	EmojiBack              = "\U0001F519"
 	EmojiBookmark          = "\U0001F516"
 	EmojiAlarmClock        = "\u23f0"
+)
+
+var (
+	SaintPetersburgStation = yandex_rasp_api.Station{Code: "c2", Title: "Санкт-Петербург"}
+	//BronevayaStation = yandex_rasp_api.Station{Code: "s9603500", Title: "Броневая"}
+	//LeninskyProspektStation = yandex_rasp_api.Station{Code: "s9603435", Title: "Ленинский Проспект"}
+	UniversityStation = yandex_rasp_api.Station{Code: "s9603770", Title: "Университетская (Университет)"}
 )
 
 var (
@@ -502,10 +510,15 @@ func (telegramBot *TelegramBot) handleMessageTrains(message *telegram_api.Messag
 }
 
 func (telegramBot *TelegramBot) handleMessageToHome(message *telegram_api.Message) {
-	log.Println(message.Text)
+	params := yandex_rasp_api.SearchSchedulePointPointParams{From: SaintPetersburgStation, To: UniversityStation, Date: time.Now()}
+	searchResponse, err := yandex_rasp_api.SearchSchedulePointPoint(&params)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
-		Text:      "Едем домой",
+		Text:      searchResponse.Segments[0].Departure,
 		ParseMode: telegram_api.ParseModeHTML,
 	}
 	if _, err := telegramBot.Bot.SendMessage(&botMessage); err != nil {
@@ -514,7 +527,6 @@ func (telegramBot *TelegramBot) handleMessageToHome(message *telegram_api.Messag
 }
 
 func (telegramBot *TelegramBot) handleMessageToUniversity(message *telegram_api.Message) {
-	log.Println(message.Text)
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
 		Text:      "Едем в Универ",
@@ -526,7 +538,6 @@ func (telegramBot *TelegramBot) handleMessageToUniversity(message *telegram_api.
 }
 
 func (telegramBot *TelegramBot) handleMessageCustomTrail(message *telegram_api.Message) {
-	log.Println(message.Text)
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
 		Text:      "Тут выбираем откуда, куда и когда едем",
@@ -538,7 +549,6 @@ func (telegramBot *TelegramBot) handleMessageCustomTrail(message *telegram_api.M
 }
 
 func (telegramBot *TelegramBot) handleMessageCustomizeTrails(message *telegram_api.Message) {
-	log.Println(message.Text)
 	botMessage := telegram_api.BotMessage{
 		ChatID:    message.Chat.ID,
 		Text:      "Тут настраиваем где дом/Универ",
